@@ -69,7 +69,7 @@ const sendingSms = async (req, res, next) => {
         return next(new AppError("SMS registration not found", 400));
       }
      
-      if(sms.Quantity<=194){
+      if(sms.Quantity<=0){
          res.status(202).json({
             success:false,
             message:"Sms limit Reached"

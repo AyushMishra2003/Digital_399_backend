@@ -45,7 +45,7 @@ const smsSchema=new Schema(
                      }
                 },
                 toWhom:{
-                    type:Array
+                    type:String
                 },
                 response:{
                     type:String,
