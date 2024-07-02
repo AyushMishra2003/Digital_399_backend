@@ -19,7 +19,7 @@ const serviceSchema=new Schema(
         basic_info_id: {
             type: Schema.Types.ObjectId,
             ref: 'BasicInfo'
-          }
+        }
     },
     {
         timestamps:true

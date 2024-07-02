@@ -1,24 +1,29 @@
 import { response } from "express";
 import SMS from "../models/SmsCustomer.model.js";
 import AppError from "../utlis/error.utlis.js";
+import smsSending from "../models/SmsSeding.model.js";
 
 
 
 const registrationSms=async(req,res,next)=>{
 try{
  
-   const {name,phoneNumber,projectName,Quantity,startingDate,domain,apiKey,apiUser}=req.body
+   const {name,phoneNumber,projectName,Quantity,domain,apiKey,apiUser}=req.body
 
-   if(!name || !phoneNumber || !projectName || !Quantity || !startingDate || !domain || !apiKey || !apiUser){
+   console.log(req.body);
+
+   if(!name || !phoneNumber || !projectName || !Quantity  || !domain || !apiKey || !apiUser){
     return next(new AppError("All field are Required",400))
    }
+
+   const startDate = new Date();
 
    const sms=await SMS.create({
         name,
         phoneNumber,
         projectName,
         Quantity,
-        startingDate,
+        startingDate:startDate,
         domain,
         apiKey,
         apiUser
@@ -59,59 +64,57 @@ const getAllSmsUser=async(req,res,next)=>{
 
 const sendingSms = async (req, res, next) => {
     try {
-      const { id } = req.params;
-      const { customerId, message, toWhom, contactNumber,response } = req.body;
-  
+        const { customerId, message, toWhom, contactNumber } = req.body;
+        
+        if(!customerId || !message ||!toWhom || !contactNumber){
+            return next(new AppError("All field are Required",400))
+        }
+ 
+        const sms = await SMS.findById(customerId);
 
-      const sms = await SMS.findById(id);
-  
-      if (!sms) {
-        return next(new AppError("SMS registration not found", 400));
-      }
+        if (!sms) {
+            return next(new AppError("SMS registration not found", 400));
+        }
+
+   
+        if (sms.Quantity <= 0) {
+            return res.status(202).json({
+                success: false,
+                message: "Sms limit Reached"
+            });
+        }
+
+   
+        const smsData = await smsSending.create({
+            customerId,
+            sendingSms: {
+                message,
+                contactNumber
+            },
+            toWhom,
+            response: response ? "True" : "False" 
+        });
+
      
-      if(sms.Quantity<=0){
-         res.status(202).json({
-            success:false,
-            message:"Sms limit Reached"
-         })
-      }
 
+        smsData.response=true
+        await sms.save();
 
-      const smsSentSuccessfully = true;
+        sms.Quantity = sms.Quantity - 1;
+  
 
-   
-      const smsData = {
-        customerId,
-        sendingSms: {
-          message,
-          contactNumber
-        },
-        toWhom,
-        response: smsSentSuccessfully ? "True" : "False"
-      };
-  
-  
-  
-      sms.sms.push(smsData);
-  
-   
-      sms.Quantity = sms.Quantity - 1;
-      console.log(sms.sms.response);
-      sms.sms.response = "True";
      
-      console.log(sms.sms);
-   
-      await sms.save();
-  
-      res.status(200).json({
-        success: true,
-        message: "Sending message successfully",
-        data: smsData 
-      });
+        res.status(200).json({
+            success: true,
+            message: "Sms Sent Successfully",
+            data: smsData
+        });
+
     } catch (error) {
-      return next(new AppError(error.message, 500));
+     
+        return next(new AppError(error.message, 500));
     }
-  };
+}
 
 
 

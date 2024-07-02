@@ -8,7 +8,7 @@ const smsRouter=Router()
 
 smsRouter.post("/",registrationSms)
 smsRouter.get("/",getAllSmsUser)
-smsRouter.post("/:id",sendingSms)
+smsRouter.post("/smsSend",sendingSms)
 export default smsRouter
 
 

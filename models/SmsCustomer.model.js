@@ -31,30 +31,6 @@ const smsSchema=new Schema(
             type:String,
             default:""
          },
-         sms:[
-            {
-                customer_id:{
-                    type:String
-                },
-                sendingSms:{
-                     message:{
-                        type:String
-                     },
-                     contactNumber:{
-                        type:Number
-                     }
-                },
-                toWhom:{
-                    type:Array
-                },
-                response:{
-                    type:String,
-                    enum:["True","False"],
-                    default:"False"
-                }
-            }
-         ]
-        
     },
     {
         timestamps:true
