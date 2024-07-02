@@ -1,6 +1,7 @@
 import { Router } from "express";
 import upload from '../middleware/multer.middleware.js'
 import { addService, getAllService, getService } from "../controller/ServiceController.js";
+import { addProduct } from "../controller/Product.controller.js";
 
 
 
