@@ -26,10 +26,11 @@ const smsSchema=new Schema(
          },
          apiKey:{
             type:Number,
+            unique:true
          },
          apiUser:{
             type:String,
-            default:""
+            unique:true
          },
     },
     {
