@@ -4,6 +4,7 @@ import { config } from 'dotenv';
 import morgan from 'morgan';
 import basicRoute from './routes/basic.route.js';
 import serviceRoute from './routes/service.routes.js';
+import smsRouter from './routes/sms.route.js';
 
 
 config()
@@ -30,6 +31,7 @@ app.use((req, res, next) => {
 
 app.use('/api/v1/basicInfo',basicRoute)
 app.use('/api/v1/service',serviceRoute)
+app.use('/api/v1/sms',smsRouter)
 
 
 // Default route for testing server

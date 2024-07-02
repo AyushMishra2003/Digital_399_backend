@@ -54,7 +54,51 @@ try{
 }
 }
 
+const getAllService=async(req,res,next)=>{
+ try{
+
+
+  const service=await Service.find({})
+
+  if(!service){
+    return next(new AppError("Service Not Found",400))
+  }
+
+  res.status(200).json({
+     success:true,
+     message:"All Service are:-",
+     data:service
+  })
+
+ }catch(error){
+  return next(new AppError(error.message,500))
+ }
+}
+
+const getService=async(req,res,next)=>{
+  try{
+     const {id}=req.params
+     
+     const service=await Service.findById(id)
+
+     if(!service){
+      return next(new AppError("Service Not Found",400))
+     }
+     
+     res.status(200).json({
+      success:true,
+      message:"Service Reterived Succesfully",
+      data:service
+     })
+
+  }catch(error){
+    return next(new AppError(error.message,500))
+  }
+}
+
 
 export {
-    addService
+    addService,
+    getAllService,
+    getService
 }
