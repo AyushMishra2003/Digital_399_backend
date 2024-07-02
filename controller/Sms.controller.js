@@ -73,7 +73,10 @@ const sendingSms = async (req, res, next) => {
         const sms = await SMS.findById(customerId);
 
         if (!sms) {
-            return next(new AppError("SMS registration not found", 400));
+            res.status(400).json({
+                success:false,
+                message:"SMS Registration not Found"
+            })
         }
 
    
