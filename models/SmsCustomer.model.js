@@ -24,13 +24,14 @@ const smsSchema=new Schema(
          domain:{
             type:String
          },
-         apiKey:{
-            type:Number,
-            unique:true
+         userName:{
+            type:String
          },
-         apiUser:{
-            type:String,
-            unique:true
+         password:{
+            type:String
+         },
+         token:{
+            type:Object
          },
     },
     {

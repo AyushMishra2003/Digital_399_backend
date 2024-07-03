@@ -2,17 +2,17 @@ import { response } from "express";
 import SMS from "../models/SmsCustomer.model.js";
 import AppError from "../utlis/error.utlis.js";
 import smsSending from "../models/SmsSeding.model.js";
-
+import axios from 'axios'
 
 
 const registrationSms=async(req,res,next)=>{
 try{
  
-   const {name,phoneNumber,projectName,Quantity,domain,apiKey,apiUser}=req.body
+   const {name,phoneNumber,projectName,Quantity,domain,userName,password,token}=req.body
 
    console.log(req.body);
 
-   if(!name || !phoneNumber || !projectName || !Quantity  || !domain || !apiKey || !apiUser){
+   if(!name || !phoneNumber || !projectName || !Quantity  || !domain || !userName || !password || !token){
     return next(new AppError("All field are Required",400))
    }
 
@@ -25,10 +25,11 @@ try{
         Quantity,
         startingDate:startDate,
         domain,
-        apiKey,
-        apiUser
+        userName,
+        password,
+        token
    })
-m  
+
    await sms.save()
 
    res.status(200).json({
@@ -65,29 +66,66 @@ const getAllSmsUser=async(req,res,next)=>{
 const sendingSms = async (req, res, next) => {
     try {
         const { customerId, message, toWhom, contactNumber } = req.body;
-        
-        if(!customerId || !message ||!toWhom || !contactNumber){
-            return next(new AppError("All field are Required",400))
+
+
+        if (!customerId || !message || !toWhom || !contactNumber) {
+            return next(new AppError("All fields are required", 400));
         }
- 
+
         const sms = await SMS.findById(customerId);
 
         if (!sms) {
-            res.status(400).json({
-                success:false,
-                message:"SMS Registration not Found"
-            })
+            return res.status(400).json({
+                success: false,
+                message: "SMS Registration not found"
+            });
         }
 
-   
         if (sms.Quantity <= 0) {
             return res.status(202).json({
                 success: false,
-                message: "Sms limit Reached"
+                message: "SMS limit reached"
             });
         }
 
    
+        const queryParams = new URLSearchParams();
+        queryParams.append('username', sms.userName);
+        queryParams.append('password', sms.password);
+        queryParams.append('receiver_number', contactNumber);
+        queryParams.append('msgtext', message);
+        queryParams.append('token', sms.token);
+
+        const apiUrl = `https://api.devindia.in/api/send/text/message/v1?${queryParams.toString()}`;
+
+        let apiResponse;
+        try {
+       
+            apiResponse = await axios.post(apiUrl);
+        } catch (error) {
+         
+            console.error("API Error:", error.message);
+            const smsData = await smsSending.create({
+                customerId,
+                sendingSms: {
+                    message,
+                    contactNumber
+                },
+                toWhom,
+                response: "False",
+                responseData: {
+                    error: error.message  
+                }
+            });
+
+            return res.status(400).json({
+                success: false,
+                message: "Failed to send SMS",
+                data: smsData
+            });
+        }
+
+        
         const smsData = await smsSending.create({
             customerId,
             sendingSms: {
@@ -95,29 +133,27 @@ const sendingSms = async (req, res, next) => {
                 contactNumber
             },
             toWhom,
-            response: response ? "True" : "False" 
+            response: "True",
+            responseData: apiResponse.data
         });
 
      
-
-        smsData.response=true
-        await sms.save();
-
         sms.Quantity = sms.Quantity - 1;
-  
+        await sms.save();
 
      
         res.status(200).json({
             success: true,
-            message: "Sms Sent Successfully",
+            message: "SMS Sent Successfully",
             data: smsData
         });
 
     } catch (error) {
-     
+        console.error("Internal Error:", error.message);
         return next(new AppError(error.message, 500));
     }
 }
+
 
 
 

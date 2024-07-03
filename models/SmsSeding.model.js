@@ -29,7 +29,10 @@ const smsSendingSchema = new Schema(
                 smsCustomer_id: {
                     type: Schema.Types.ObjectId,
                     ref: 'SMS' 
-                }
+                },
+                responseData:{
+                    type: Schema.Types.Mixed
+                 }
             }
          ],
     {

@@ -6,6 +6,7 @@ import basicRoute from './routes/basic.route.js';
 import serviceRoute from './routes/service.routes.js';
 import smsRouter from './routes/sms.route.js';
 import productRoute from './routes/product.routes.js';
+import errorMiddleware from './middleware/error.middleware.js';
 
 
 config()
@@ -34,6 +35,8 @@ app.use('/api/v1/basicInfo',basicRoute)
 app.use('/api/v1/service',serviceRoute)
 app.use('/api/v1/sms',smsRouter)
 app.use('/api/v1/product',productRoute)
+
+app.use(errorMiddleware)
 
 
 // Default route for testing server
