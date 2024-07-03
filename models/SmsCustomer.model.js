@@ -7,7 +7,7 @@ const smsSchema = new Schema(
             default: "",
         },
         phoneNumber: {
-            type: Number,
+            type: String,
             default: "",
             required: true,
         },

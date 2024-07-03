@@ -15,7 +15,9 @@ try{
    if(!name || !phoneNumber || !projectName || !Quantity  || !domain || !apiUserName || !apiPassword || !apiKey){
     return next(new AppError("All field are Required",400))
    }
-
+   
+   console.log(typeof phoneNumber);
+   console.log(phoneNumber.length);
    if(phoneNumber.length!=10){
     return next(new AppError("Phone Number is not Valid",400))
    }
