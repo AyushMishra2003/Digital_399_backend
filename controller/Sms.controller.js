@@ -160,25 +160,28 @@ const sendingSms = async (req, res, next) => {
 }
 
 
-const getAllSendingSms=async(req,res,next)=>{
-  try{
-     console.log("mai aaya hu kya");
-    const allSMS=await smsSending.find({})
+const getAllSendingSms = async (req, res, next) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10; 
 
-    if(!allSMS){
-        return next(new AppError("Message not Found"))
+        const allSMS = await smsSending.find({})
+                                      .limit(limit);
+
+        if (allSMS.length === 0) {
+            return next(new AppError("No messages found", 404));
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "All messages retrieved successfully",
+            data: allSMS
+        });
+
+    } catch (error) {
+        return next(new AppError(error.message, 500));
     }
-
-    res.status(200).json({
-        success:true,
-        message:"All Message Reterive Succesfully",
-        data:allSMS
-    })
-
-  }catch(error){
-    return next(new AppError(error.message,500))
-  }
 }
+
 
 
 
