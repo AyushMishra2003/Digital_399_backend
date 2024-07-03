@@ -49,6 +49,30 @@ try{
 }
 }
 
+
+const updateSmsUser = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const updateFields = req.body; 
+
+        const updatedSmsUser = await SMS.findByIdAndUpdate(id, updateFields, { new: true });
+
+        if (!updatedSmsUser) {
+            return next(new AppError("SMS user not found", 404));
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "SMS user updated successfully",
+            data: updatedSmsUser
+        });
+
+    } catch (error) {
+        return next(new AppError(error.message, 500));
+    }
+}
+
+
 const getAllSmsUser=async(req,res,next)=>{
      try{
         
@@ -190,5 +214,6 @@ export {
      registrationSms,
      getAllSmsUser,
      sendingSms,
-     getAllSendingSms
+     getAllSendingSms,
+     updateSmsUser
 }
