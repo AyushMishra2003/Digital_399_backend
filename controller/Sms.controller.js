@@ -235,6 +235,30 @@ const getAllSendingSms = async (req, res, next) => {
     }
 }
 
+const getAllFalseSendingSMS=async(req,res,next)=>{
+    try{
+        
+        console.log("sms-1");
+        const allfalseSms=await smsSending.find({response:"False"})
+        console.log("sms-2");
+        if(!allfalseSms){
+            return next(new AppError("False sms not Found",404))
+        }
+
+        res.status(200).json({
+            success:true,
+            message:"All not Sent Message",
+            data:allfalseSms
+        })
+
+
+    }catch(error){
+        return next(new AppError(error.message,50))
+    }
+}
+
+
+
 
 
 
@@ -245,5 +269,6 @@ export {
      sendingSms,
      getAllSendingSms,
      updateSmsUser,
-     deleteSmsUser
+     deleteSmsUser,
+     getAllFalseSendingSMS
 }
