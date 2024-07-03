@@ -93,6 +93,35 @@ const getAllSmsUser=async(req,res,next)=>{
      }
 }
 
+
+const deleteSmsUser=async(req,res,next)=>{
+try{
+
+    const {id}=req.params
+
+    const sms=await SMS.findById(id)
+
+    if(!sms){
+        return next(new AppError("SMS User not Found",404))
+    }
+
+    await SMS.findByIdAndDelete(id)
+
+    res.status(200).json({
+        success:true,
+        message:"Delete Sms User Succesfully"
+    })
+
+
+
+}catch(error){
+    return(error.message,500)
+}
+}
+
+
+
+
 const sendingSms = async (req, res, next) => {
     try {
         const { customerId, message, contactNumber } = req.body;
@@ -215,5 +244,6 @@ export {
      getAllSmsUser,
      sendingSms,
      getAllSendingSms,
-     updateSmsUser
+     updateSmsUser,
+     deleteSmsUser
 }
