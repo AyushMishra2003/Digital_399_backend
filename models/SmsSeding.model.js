@@ -18,9 +18,6 @@ const smsSendingSchema = new Schema(
                         type: Number
                     }
                 },
-                toWhom: {
-                    type: Array
-                },
                 response: {
                     type: String,
                     enum: ["True", "False"],

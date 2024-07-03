@@ -8,12 +8,16 @@ import axios from 'axios'
 const registrationSms=async(req,res,next)=>{
 try{
  
-   const {name,phoneNumber,projectName,Quantity,domain,userName,password,token}=req.body
+   const {name,phoneNumber,projectName,Quantity,domain,apiUserName,apiPassword,apiKey}=req.body
 
    console.log(req.body);
 
-   if(!name || !phoneNumber || !projectName || !Quantity  || !domain || !userName || !password || !token){
+   if(!name || !phoneNumber || !projectName || !Quantity  || !domain || !apiUserName || !apiPassword || !apiKey){
     return next(new AppError("All field are Required",400))
+   }
+
+   if(phoneNumber.length!=10){
+    return next(new AppError("Phone Number is not Valid",400))
    }
 
    const startDate = new Date();
@@ -25,9 +29,9 @@ try{
         Quantity,
         startingDate:startDate,
         domain,
-        userName,
-        password,
-        token
+        apiUserName,
+        apiPassword,
+        apiKey
    })
 
    await sms.save()
@@ -65,10 +69,10 @@ const getAllSmsUser=async(req,res,next)=>{
 
 const sendingSms = async (req, res, next) => {
     try {
-        const { customerId, message, toWhom, contactNumber } = req.body;
+        const { customerId, message, contactNumber } = req.body;
 
 
-        if (!customerId || !message || !toWhom || !contactNumber) {
+        if (!customerId || !message  || !contactNumber) {
             return next(new AppError("All fields are required", 400));
         }
 
@@ -88,13 +92,15 @@ const sendingSms = async (req, res, next) => {
             });
         }
 
+        console.log(sms);
+
    
         const queryParams = new URLSearchParams();
-        queryParams.append('username', sms.userName);
-        queryParams.append('password', sms.password);
+        queryParams.append('username', sms.apiUserName);
+        queryParams.append('password', sms.apiPassword);
         queryParams.append('receiver_number', contactNumber);
         queryParams.append('msgtext', message);
-        queryParams.append('token', sms.token);
+        queryParams.append('token', sms.apiKey);
 
         const apiUrl = `https://api.devindia.in/api/send/text/message/v1?${queryParams.toString()}`;
 
@@ -104,14 +110,12 @@ const sendingSms = async (req, res, next) => {
             apiResponse = await axios.post(apiUrl);
         } catch (error) {
          
-            console.error("API Error:", error.message);
             const smsData = await smsSending.create({
                 customerId,
                 sendingSms: {
                     message,
                     contactNumber
                 },
-                toWhom,
                 response: "False",
                 responseData: {
                     error: error.message  
@@ -132,7 +136,6 @@ const sendingSms = async (req, res, next) => {
                 message,
                 contactNumber
             },
-            toWhom,
             response: "True",
             responseData: apiResponse.data
         });
@@ -155,11 +158,32 @@ const sendingSms = async (req, res, next) => {
 }
 
 
+const getAllSendingSms=async(req,res,next)=>{
+  try{
+     console.log("mai aaya hu kya");
+    const allSMS=await smsSending.find({})
+
+    if(!allSMS){
+        return next(new AppError("Message not Found"))
+    }
+
+    res.status(200).json({
+        success:true,
+        message:"All Message Reterive Succesfully",
+        data:allSMS
+    })
+
+  }catch(error){
+    return next(new AppError(error.message,500))
+  }
+}
+
 
 
 
 export {
      registrationSms,
      getAllSmsUser,
-     sendingSms
+     sendingSms,
+     getAllSendingSms
 }
