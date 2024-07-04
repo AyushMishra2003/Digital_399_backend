@@ -7,6 +7,7 @@ import serviceRoute from './routes/service.routes.js';
 import smsRouter from './routes/sms.route.js';
 import productRoute from './routes/product.routes.js';
 import errorMiddleware from './middleware/error.middleware.js';
+import userRoute from './routes/user.route.js';
 
 
 config()
@@ -14,8 +15,9 @@ config()
 const app = express();
 
 // Middleware
-app.use(express.json());
 app.use(cookieParser());
+app.use(express.json());
+
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev')); // Logging requests to the console
 
@@ -30,7 +32,7 @@ app.use((req, res, next) => {
 });
 
 
-
+app.use('/api/v1/user',userRoute)
 app.use('/api/v1/basicInfo',basicRoute)
 app.use('/api/v1/service',serviceRoute)
 app.use('/api/v1/sms',smsRouter)
