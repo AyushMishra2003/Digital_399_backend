@@ -83,8 +83,70 @@ const getProduct=async(req,res,next)=>{
 }
 
 
+const editProduct=async(req,res,next)=>{
+  try{
+     const { id } = req.params;
+    const updateFields = req.body; 
+
+    const updatedProduct = await Products.findByIdAndUpdate(id, updateFields, { new: true });
+
+    if (!updatedProduct ) {
+        return next(new AppError("Product not found", 404));
+    }
+
+    console.log(updatedProduct);
+
+    if(req.file){
+        const result=await cloudinary.v2.uploader.upload(req.file.path,{
+            folder:'lms'
+        })
+        if(result){
+            updatedProduct.productPhoto.public_id=result.public_id,
+            updatedProduct.productPhoto.secure_url=result.secure_url
+        }
+        fs.rm(`uploads/${req.file.filename}`)
+    }
+
+    res.status(200).json({
+        success: true,
+        message: "Product Update successfully",
+        data: updatedProduct
+    });
+
+       
+  }catch(error){
+     return next(new AppError(error.message,500))
+  }
+}
+
+
+const deleteProduct=async(req,res,next)=>{
+    try{
+
+        const {id}=req.params
+
+        const product=await Products.findById(id)
+
+        if(!product){
+            return next(new AppError("Product not Found",404))
+        }
+
+        await Products.findByIdAndDelete(id)
+
+        res.status(200).json({
+            success:true,
+            message:"Product Delete Succesfully"
+        })
+
+    }catch(error){
+        return next(new AppError(error.message,500))
+    }
+}
+
 
 export {
     addProduct,
-    getProduct
+    getProduct,
+    editProduct,
+    deleteProduct
 }

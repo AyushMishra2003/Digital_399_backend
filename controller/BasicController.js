@@ -142,11 +142,33 @@ try{
 }
 }
 
+const deleteBasicInfo=async(req,res,next)=>{
+  try{
+  const {id}=req.params
+
+  const basicInfo=await BasicInfo.findById(id)
+
+  if(!basicInfo){
+    return next(new AppError("BasicInformation Not Found",400))
+  }
+
+  await BasicInfo.findByIdAndDelete(id)
+
+  res.status(200).json({
+    success:true,
+    message:"Basic Information Delete Succesfully"
+  })
+}catch(error){
+  return next(new AppError(error.message,500))
+}
+}
+
 
 
 export {
     addBasicInfo,
     getAllBasicInfo,
     getBasicInfo,
-    updateBasicInfo
+    updateBasicInfo,
+    deleteBasicInfo
 }

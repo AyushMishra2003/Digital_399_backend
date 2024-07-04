@@ -97,8 +97,80 @@ const getService=async(req,res,next)=>{
 }
 
 
+const updateService = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const updateFields = req.body;
+
+    console.log(updateFields);
+
+    const updatedService = await Service.findByIdAndUpdate(id, updateFields, { new: true });
+
+
+    if (!updatedService) {
+      return next(new AppError("Service not found", 404));
+    }
+
+    console.log("updated Service", updatedService);
+
+
+    if (req.file) {
+      const result = await cloudinary.v2.uploader.upload(req.file.path, {
+        folder: 'lms'
+      });
+
+      console.log(result);
+      
+      if (result) {
+        updatedService.servicePhoto.public_id = result.public_id;
+        updatedService.servicePhoto.secure_url = result.secure_url;
+      }
+      fs.rm(`uploads/${req.file.filename}`)
+    }
+
+
+    await updatedService.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Service updated successfully",
+      data: updatedService
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 500));
+  }
+}
+
+
+
+const deleteService=async(req,res,next)=>{
+try{
+
+  const {id}=req.params
+
+  const service=await Service.findById(id)
+
+  if(!service){
+    return next(new AppError("Service Not Found",404))
+  }
+
+  await Service.findByIdAndDelete(id)
+
+  res.status(200).json({
+    success:true,
+    message:"Delete Service Succesfully"
+  })
+
+}catch(error){
+  return next(new AppError(error.message,500))
+}
+}
+
+
 export {
     addService,
     getAllService,
-    getService
+    getService,
+    updateService,
+    deleteService
 }
