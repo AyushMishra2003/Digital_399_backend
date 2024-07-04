@@ -9,6 +9,7 @@ import productRoute from './routes/product.routes.js';
 import errorMiddleware from './middleware/error.middleware.js';
 import userRoute from './routes/user.route.js';
 import enquiryRouter from './routes/enquiry.route.js';
+import feedbackRouter from './routes/feedback.route.js';
 
 
 config()
@@ -39,6 +40,7 @@ app.use('/api/v1/service',serviceRoute)
 app.use('/api/v1/sms',smsRouter)
 app.use('/api/v1/product',productRoute)
 app.use("/api/v1/inquiry",enquiryRouter)
+app.use("/api/v1/feedback",feedbackRouter)
 
 app.use(errorMiddleware)
 
