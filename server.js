@@ -18,5 +18,3 @@ app.listen(PORT,async()=>{
     await ConnectionToDB();
     console.log(`App is running at http:localhost ${PORT}`);
 })
-
-console.log("ayush");

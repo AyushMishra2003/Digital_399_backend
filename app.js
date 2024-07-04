@@ -8,6 +8,7 @@ import smsRouter from './routes/sms.route.js';
 import productRoute from './routes/product.routes.js';
 import errorMiddleware from './middleware/error.middleware.js';
 import userRoute from './routes/user.route.js';
+import enquiryRouter from './routes/enquiry.route.js';
 
 
 config()
@@ -37,6 +38,7 @@ app.use('/api/v1/basicInfo',basicRoute)
 app.use('/api/v1/service',serviceRoute)
 app.use('/api/v1/sms',smsRouter)
 app.use('/api/v1/product',productRoute)
+app.use("/api/v1/inquiry",enquiryRouter)
 
 app.use(errorMiddleware)
 
