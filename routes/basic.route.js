@@ -8,7 +8,7 @@ basicRoute.post("/",upload.single("companyLogo"),addBasicInfo)
 basicRoute.get("/",getAllBasicInfo)
 basicRoute.get("/:id",getBasicInfo)
 basicRoute.put("/:id",upload.single("companyLogo"),updateBasicInfo)
-basicRoute.delete("/",deleteBasicInfo)
+basicRoute.delete("/:id",deleteBasicInfo)
 
 
 
