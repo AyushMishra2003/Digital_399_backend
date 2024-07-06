@@ -70,6 +70,8 @@ const getAllUser=async(req,res,next)=>{
 const login = async (req, res, next) => {
     try {
         const { userName, password } = req.body;
+
+        console.log(req.body);
         
         if (!userName || !password) {
             return next(new AppError('All fields are required', 400));

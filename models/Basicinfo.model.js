@@ -37,7 +37,17 @@ const BasicSchema=new Schema(
         aboutUs:{
             type:String,
             default:""
-       }        
+        },
+        isActive:{
+            type:String,
+            enum:["ACTIVE","DEACTIVE"],
+            default:"ACTIVE"
+        },
+        isPaid:{
+            type:String,
+            enum:["FREE","PAID"],
+            default:"FREE"
+        }        
     },
     {
         timestamps:true

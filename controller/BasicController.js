@@ -7,7 +7,7 @@ import fs from 'fs/promises'
 const addBasicInfo=async(req,res,next)=>{
 try{
 
-const {companyLogo,companyName,companyOwner,phoneNumber,whastappNumber,address,email_id,aboutUs}=req.body
+const {companyLogo,companyName,companyOwner,phoneNumber,whastappNumber,address,email_id,aboutUs,isActive,isPaid}=req.body
 const basicinfo=await BasicInfo.create({
      companyName,
      companyOwner,
@@ -19,7 +19,9 @@ const basicinfo=await BasicInfo.create({
      companyLogo:{
         public_id:"",
         secure_url:""
-     }
+     },
+     isActive,
+     isPaid
  })
   
  console.log(basicinfo);
@@ -163,6 +165,42 @@ const deleteBasicInfo=async(req,res,next)=>{
 }
 }
 
+const isActive=async(req,res,next)=>{
+  try{
+     
+    const {id}=req.params
+
+    const basicInfo=await BasicInfo.findById(id)
+
+    console.log(basicInfo);
+
+    if(!basicInfo){
+       return next(new AppError("Basic Information Not Found",400))
+    }
+    
+   console.log(basicInfo);
+   console.log(basicInfo.isActive);
+
+    if(basicInfo.isActive==="ACTIVE"){
+        console.log("mujhse bula diya");
+       basicInfo.isActive="DEACTIVE"
+    }else{
+         basicInfo.isActive="ACTIVE"
+    }
+
+    await basicInfo.save()
+
+    res.status(200).json({
+      success:true,
+      message:"Basic information updated",
+      data:basicInfo
+    })
+  
+  }catch(error){
+    return next(new AppError(error.message,500))
+  }
+}
+
 
 
 export {
@@ -170,5 +208,6 @@ export {
     getAllBasicInfo,
     getBasicInfo,
     updateBasicInfo,
-    deleteBasicInfo
+    deleteBasicInfo,
+    isActive
 }

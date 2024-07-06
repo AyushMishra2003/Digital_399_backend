@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addBasicInfo, deleteBasicInfo, getAllBasicInfo, getBasicInfo, updateBasicInfo } from "../controller/BasicController.js";
+import { addBasicInfo, deleteBasicInfo, getAllBasicInfo, getBasicInfo, isActive, updateBasicInfo } from "../controller/BasicController.js";
 import upload from '../middleware/multer.middleware.js'
 
 const basicRoute=Router()
@@ -9,6 +9,7 @@ basicRoute.get("/",getAllBasicInfo)
 basicRoute.get("/:id",getBasicInfo)
 basicRoute.put("/:id",upload.single("companyLogo"),updateBasicInfo)
 basicRoute.delete("/:id",deleteBasicInfo)
+basicRoute.put("/active/:id",isActive)
 
 
 
