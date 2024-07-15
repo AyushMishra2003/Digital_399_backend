@@ -31,7 +31,7 @@ const basicinfo=await BasicInfo.create({
     })
     console.log(result);
     if(result){
-        // basicinfo.companyLogo.public_id=result.public_id,
+        basicinfo.companyLogo.public_id=result.public_id,
         basicinfo.companyLogo.secure_url=result.secure_url
     }
     fs.rm(`uploads/${req.file.filename}`)

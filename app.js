@@ -10,6 +10,8 @@ import errorMiddleware from './middleware/error.middleware.js';
 import userRoute from './routes/user.route.js';
 import enquiryRouter from './routes/enquiry.route.js';
 import feedbackRouter from './routes/feedback.route.js';
+import conversationRoute from './routes/Conversation.route.js';
+import operatorRoute from './routes/Operator.route.js';
 
 
 config()
@@ -41,6 +43,8 @@ app.use('/api/v1/sms',smsRouter)
 app.use('/api/v1/product',productRoute)
 app.use("/api/v1/inquiry",enquiryRouter)
 app.use("/api/v1/feedback",feedbackRouter)
+app.use("/api/v1/message",conversationRoute)
+app.use("/api/v1/operator",operatorRoute)
 
 app.use(errorMiddleware)
 

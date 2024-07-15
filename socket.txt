@@ -1,0 +1,2 @@
+#web socket is two way communcation between client client or client server 
+#Socket.io is an library for web socket 
