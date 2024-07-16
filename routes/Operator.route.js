@@ -8,7 +8,7 @@ const operatorRoute=Router()
 
 operatorRoute.post("/",upload.single('operatorPhoto'),addOperator)
 operatorRoute.get("/",getOperator)
-operatorRoute.put("/:id",upload.single('operatorPhoto'),updateOperator)
+operatorRoute.put("/:id",updateOperator)
 operatorRoute.put("/operatorStatus/:id",updateStatus)
 
 
