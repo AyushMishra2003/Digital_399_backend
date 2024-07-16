@@ -12,6 +12,7 @@ import enquiryRouter from './routes/enquiry.route.js';
 import feedbackRouter from './routes/feedback.route.js';
 import conversationRoute from './routes/Conversation.route.js';
 import operatorRoute from './routes/Operator.route.js';
+import couponRouter from './routes/coupon.routes.js';
 
 
 config()
@@ -45,6 +46,7 @@ app.use("/api/v1/inquiry",enquiryRouter)
 app.use("/api/v1/feedback",feedbackRouter)
 app.use("/api/v1/message",conversationRoute)
 app.use("/api/v1/operator",operatorRoute)
+app.use("/api/v1/coupon",couponRouter)
 
 app.use(errorMiddleware)
 

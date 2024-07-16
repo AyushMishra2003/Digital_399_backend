@@ -13,12 +13,12 @@ const operatorSchema=new Schema(
         type:String
        },
        operatorPhoto:{
-        public_id:{
+           public_id:{
+               type:String,
+          },
+          secure_url:{
             type:String,
-        },
-        secure_url:{
-            type:String,
-        }
+          }
        },
        operatorStatus:{
          type:Number,

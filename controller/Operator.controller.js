@@ -20,7 +20,10 @@ try{
         operatorPassword
     })
 
+    console.log(req.file);
+
     if(req.file){
+      console.log("hello");
         const result=await cloudinary.v2.uploader.upload(req.file.path,{
             folder:'lms'
         })
@@ -33,9 +36,13 @@ try{
     }
 
 
+
+
     if(!operator){
         return next(new AppError("Operator Not  Created",400))
     }
+
+    await operator.save()
     
     res.status(200).json({
         success:true,
@@ -93,6 +100,7 @@ const updateOperator = async (req, res, next) => {
   
       // Upload operator photo to Cloudinary if req.file exists
       if (req.file) {
+        console.log("hello");
         const result = await cloudinary.v2.uploader.upload(req.file.path, {
           folder: 'lms'
         });
@@ -160,5 +168,6 @@ export {
     addOperator,
     getOperator,
     updateOperator,
-    updateStatus
+    updateStatus,
+    
 }
