@@ -19,6 +19,11 @@ const operatorSchema=new Schema(
         secure_url:{
             type:String,
         }
+       },
+       operatorStatus:{
+         type:Number,
+         enum:[0,1],
+         default:1
        }    
     },
     {

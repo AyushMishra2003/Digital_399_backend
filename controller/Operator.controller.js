@@ -124,7 +124,34 @@ const updateOperator = async (req, res, next) => {
     } catch (error) {
       return next(new AppError(error.message, 500));
     }
-  };
+};
+
+const updateStatus=async(req,res,next)=>{
+  try{
+
+    const {id}=req.params
+
+    const operator=await Operator.findById(id)
+    
+    if(!operator){
+      return next(new AppError("Operator Not Found",400))
+    }
+
+    operator.operatorStatus=!operator.operatorStatus
+
+    await operator.save()
+
+    res.status(200).json({
+      success:true,
+      message:"Operator List Updated",
+      data:operator
+    })
+
+
+  }catch(error){
+    return next(new AppError(error.message, 500));
+  }
+}
   
     
 
@@ -132,5 +159,6 @@ const updateOperator = async (req, res, next) => {
 export {
     addOperator,
     getOperator,
-    updateOperator
+    updateOperator,
+    updateStatus
 }
