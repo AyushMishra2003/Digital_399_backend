@@ -154,11 +154,14 @@ try{
     return next(new AppError("Service Not Found",404))
   }
 
-  await Service.findByIdAndDelete(id)
+  service.serviceStatus=!service.serviceStatus
+
+
+  await service.save()
 
   res.status(200).json({
     success:true,
-    message:"Delete Service Succesfully"
+    message:"Service Status Update Succesfully"
   })
 
 }catch(error){

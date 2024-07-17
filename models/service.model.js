@@ -16,6 +16,11 @@ const serviceSchema=new Schema(
                 type:String
             }
         },
+        serviceStatus:{
+          type:Number,
+          enum:[0,1],
+          default:1
+        },
         basic_info_id: {
             type: Schema.Types.ObjectId,
             ref: 'BasicInfo'
