@@ -22,6 +22,11 @@ const productSchema=new Schema(
         productDiscount:{
             type:Number
         },
+        productStatus:{
+            type:Number,
+            enum:[0,1],
+            default:1
+        },
         basic_info_id: {
             type: Schema.Types.ObjectId,
             ref: 'BasicInfo'

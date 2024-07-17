@@ -13,9 +13,10 @@ import feedbackRouter from './routes/feedback.route.js';
 import conversationRoute from './routes/Conversation.route.js';
 import operatorRoute from './routes/Operator.route.js';
 import couponRouter from './routes/coupon.routes.js';
+import LoginUserrouter from './routes/userLogin.routes.js';
+import dotenv from 'dotenv';
 
-
-config()
+dotenv.config()
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use("/api/v1/feedback",feedbackRouter)
 app.use("/api/v1/message",conversationRoute)
 app.use("/api/v1/operator",operatorRoute)
 app.use("/api/v1/coupon",couponRouter)
+app.use("/api/v1/userLogin",LoginUserrouter)
 
 app.use(errorMiddleware)
 

@@ -131,11 +131,13 @@ const deleteProduct=async(req,res,next)=>{
             return next(new AppError("Product not Found",404))
         }
 
-        await Products.findByIdAndDelete(id)
+        product.productStatus=!product.productStatus
+
+        await product.save()
 
         res.status(200).json({
             success:true,
-            message:"Product Delete Succesfully"
+            message:"Product Status Changed Succesfully"
         })
 
     }catch(error){
