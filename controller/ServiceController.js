@@ -13,7 +13,11 @@ try{
   const basicInfo=await BasicInfo.findById(id)
 
   if(!basicInfo){
-    return next(new AppError("BasicInfo not Found",400))
+    return next(new AppError("Id  not Found",400))
+  }
+  const token = req.cookies.token; 
+  if(token!=basicInfo.token){
+    return(next(new AppError("You are Not Authrized",400)))
   }
 
   const service=await Service.create({
@@ -57,12 +61,28 @@ try{
 const getAllService=async(req,res,next)=>{
  try{
 
+   const {basic_Info_Id}=req.params
+    
+   const basicInfo=await BasicInfo.findById(basic_Info_Id)
+
+   if(!basicInfo){
+    return next(new AppError("Id Not Found",400))
+   }
+   
+   const token = req.cookies.token; 
+   if(token!=basicInfo.token){
+     return(next(new AppError("You are Not Authrized",400)))
+   }
+
+
 
   const service=await Service.find({})
 
   if(!service){
     return next(new AppError("Service Not Found",400))
   }
+
+  
 
   res.status(200).json({
      success:true,
@@ -77,13 +97,24 @@ const getAllService=async(req,res,next)=>{
 
 const getService=async(req,res,next)=>{
   try{
-     const {id}=req.params
-     
-     const service=await Service.findById(id)
+     const {basic_info_id}=req.params
+     const basicInfo=await BasicInfo.findById(basic_info_id)
+
+     if(!basicInfo){
+      return next("Id Not Exist",404)
+     }
+     const token = req.cookies.token; 
+     if(token!=basicInfo.token){
+       return(next(new AppError("You are Not Authrized",400)))
+     }
+
+     const service=await Service.find({basic_info_id})
 
      if(!service){
       return next(new AppError("Service Not Found",400))
      }
+
+ 
      
      res.status(200).json({
       success:true,
@@ -100,6 +131,20 @@ const getService=async(req,res,next)=>{
 const updateService = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const {basicInfoId}=req.body
+
+    const validBasicInfo=await BasicInfo.findById(basicInfoId)
+
+    if(!validBasicInfo){
+      return next(new AppError("Id is Not Valid",400))
+    }
+
+    const token = req.cookies.token; 
+    if(token!=validBasicInfo.token){
+      return(next(new AppError("You are Not Authrized",400)))
+    }
+     
+   
     const updateFields = req.body;
 
     console.log(updateFields);
@@ -145,16 +190,32 @@ const updateService = async (req, res, next) => {
 const deleteService=async(req,res,next)=>{
 try{
 
-  const {id}=req.params
+  const {id,basicInfoId}=req.body
+
+  console.log("request body",req.body);
+
+  const validBasicInfo=await BasicInfo.findById(basicInfoId)
+   
+   console.log("valid basic info",validBasicInfo);
+
+  if(!validBasicInfo){
+    return next(new AppError("Id is Not Valid",400))
+  }
+
+  const token = req.cookies.token; 
+  if(token!=validBasicInfo.token){
+    return(next(new AppError("You are Not Authrized",400)))
+  }
+   
 
   const service=await Service.findById(id)
 
   if(!service){
     return next(new AppError("Service Not Found",404))
   }
-
+  
   service.serviceStatus=!service.serviceStatus
-
+  console.log(service.serviceStatus);
 
   await service.save()
 

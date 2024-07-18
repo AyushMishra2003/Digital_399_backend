@@ -3,11 +3,18 @@ import BasicInfo from "../models/Basicinfo.model.js";
 import AppError from "../utlis/error.utlis.js";
 import cloudinary from 'cloudinary'
 import fs from 'fs/promises'
+import { rmSync } from "fs";
 
 const addBasicInfo=async(req,res,next)=>{
 try{
 
 const {companyLogo,companyName,companyOwner,phoneNumber,whastappNumber,address,email_id,aboutUs,isActive,isPaid}=req.body
+const existingUser = await BasicInfo.findOne({ phoneNumber });
+if (existingUser) {
+   return next(new AppError("Phone Number already Exist"))
+}
+ 
+
 const basicinfo=await BasicInfo.create({
      companyName,
      companyOwner,
@@ -23,7 +30,8 @@ const basicinfo=await BasicInfo.create({
      isActive,
      isPaid
  })
-  
+
+
  console.log(basicinfo);
  if(req.file){
     const result=await cloudinary.v2.uploader.upload(req.file.path,{

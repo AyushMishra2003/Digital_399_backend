@@ -5,13 +5,13 @@ const isLoggedIn = async (req, res, next) => {
     try {   
          
         console.log("cokkie ayush");
-        console.log(req.cookies); // Make sure cookies are accessible
-        const token = req.cookies.token; // Corrected token extraction
+        console.log(req.cookies); 
+        const token = req.cookies.token; 
  
         console.log(token); // Debugging token retrieval
  
-        if (token) {
-            return next(new AppError("Already Loggied In"))
+        if (!token) {
+            return next(new AppError("Not LOG In,please login first"))
         }
  
         const userDetails = await jwt.verify(token, process.env.SECRET);

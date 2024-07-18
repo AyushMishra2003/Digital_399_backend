@@ -20,13 +20,13 @@ export const requestLogin = async (req, res,next) => {
     return res.status(400).send('Phone number is required.');
   }
  
-  //  const basicInfo=await BasicInfo.findOne({phoneNumber})
+   const basicInfo=await BasicInfo.findOne({phoneNumber})
 
-  //  if(!basicInfo){
-  //    return next(new AppError("Phone Number is Not Valid",404))
-  //  }
+   if(!basicInfo){
+     return next(new AppError("Phone Number is Not Valid",404))
+   }
 
-  //  console.log(basicInfo);
+   console.log(basicInfo);
 
   const verificationCode = generateVerificationCode();
   verificationCodes[phoneNumber] = verificationCode;
@@ -45,7 +45,7 @@ export const requestLogin = async (req, res,next) => {
   }
 };
 
-export const verifyCode = (req, res) => {
+export const verifyCode = async(req, res,next) => {
   const { phoneNumber, verificationCode } = req.body;
 
   console.log(req.body);
@@ -63,6 +63,25 @@ export const verifyCode = (req, res) => {
 
   if (storedCode && storedCode === verificationCode) {
     delete verificationCodes[phoneNumber]; 
+    const basicInfo=await BasicInfo.findOne({phoneNumber})
+    const token = await basicInfo.generateJWTToken();
+
+
+    basicInfo.token=token
+    
+
+    await basicInfo.save()
+
+    console.log(basicInfo.token);
+    console.log(basicInfo);
+     res.cookie('token', token, {
+      httpOnly: true,
+      // secure: true, // Enable for HTTPS only
+      maxAge: 3600000, // Example: cookie expires in 1 hour (in milliseconds)
+      sameSite: 'strict' // Recommended to prevent CSRF
+     });
+
+
     res.status(200).json({
       success:true,
       message:"Verification Succesfully"
@@ -71,3 +90,19 @@ export const verifyCode = (req, res) => {
     res.status(400).send('Invalid verification code.');
   }
 }; 
+
+
+
+export const Userlogout=(req,res)=>{
+
+  res.cookie('token',null,{
+      secure:true,
+      maxAge:0,
+      httpOnly:true
+  })
+
+  res.status(200).json({
+      success:true,
+      message:"User logged out successfully"
+  })
+}
