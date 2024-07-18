@@ -12,7 +12,11 @@ const addProduct=async(req,res,next)=>{
         const basicInfo=await BasicInfo.findById(basicinfoId)
 
         if(!basicInfo){
-            return next(new AppError("Not Found",400))
+            return next(new AppError("BasicInfo Id is not Valid",400))
+        }
+        const token = req.cookies.token; 
+        if(token!=basicInfo.token){
+          return(next(new AppError("You are Not Authrized",400)))
         }
 
         if(!productName || !productDescription || !productPrice || !productDiscount){
@@ -82,10 +86,57 @@ const getProduct=async(req,res,next)=>{
  }
 }
 
+const getSingleProduct=async(req,res,next)=>{
+    try{
+       const {basic_info_id}=req.params
+       const basicInfo=await BasicInfo.findById(basic_info_id)
+  
+       if(!basicInfo){
+        return next("Id Not Exist",404)
+       }
+       const token = req.cookies.token; 
+       if(token!=basicInfo.token){
+         return(next(new AppError("You are Not Authrized",400)))
+       }
+  
+       const  product=await Products.find({basic_info_id})
+  
+       if(!product){
+        return next(new AppError("Service Not Found",400))
+       }
+  
+   
+       
+       res.status(200).json({
+        success:true,
+        message:"Product Reterived Succesfully",
+        data:product
+       })
+  
+    }catch(error){
+      return next(new AppError(error.message,500))
+    }
+  }
+  
+
 
 const editProduct=async(req,res,next)=>{
   try{
-     const { id } = req.params;
+
+    const {basicInfoId,id}=req.body
+
+    const validBasicInfo=await BasicInfo.findById(basicInfoId)
+
+    if(!validBasicInfo){
+      return next(new AppError("Id is Not Valid",400))
+    }
+
+    const token = req.cookies.token; 
+    if(token!=validBasicInfo.token){
+      return(next(new AppError("You are Not Authrized",400)))
+    };
+
+
     const updateFields = req.body; 
 
     const updatedProduct = await Products.findByIdAndUpdate(id, updateFields, { new: true });
@@ -94,7 +145,6 @@ const editProduct=async(req,res,next)=>{
         return next(new AppError("Product not found", 404));
     }
 
-    console.log(updatedProduct);
 
     if(req.file){
         const result=await cloudinary.v2.uploader.upload(req.file.path,{
@@ -122,8 +172,23 @@ const editProduct=async(req,res,next)=>{
 
 const deleteProduct=async(req,res,next)=>{
     try{
+        
+        const {id,basicInfoId}=req.body
 
-        const {id}=req.params
+        console.log(req.body);
+      
+      
+        const validBasicInfo=await BasicInfo.findById(basicInfoId)
+         
+      
+        if(!validBasicInfo){
+          return next(new AppError("Id is Not Valid",400))
+        }
+      
+        const token = req.cookies.token; 
+        if(token!=validBasicInfo.token){
+          return(next(new AppError("You are Not Authrized",400)))
+        }
 
         const product=await Products.findById(id)
 
@@ -150,5 +215,6 @@ export {
     addProduct,
     getProduct,
     editProduct,
-    deleteProduct
+    deleteProduct,
+    getSingleProduct
 }

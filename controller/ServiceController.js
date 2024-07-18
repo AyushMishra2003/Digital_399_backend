@@ -70,6 +70,8 @@ const getAllService=async(req,res,next)=>{
    }
    
    const token = req.cookies.token; 
+
+   console.log(token);
    if(token!=basicInfo.token){
      return(next(new AppError("You are Not Authrized",400)))
    }
@@ -192,11 +194,15 @@ try{
 
   const {id,basicInfoId}=req.body
 
+  console.log(req.body);
+
   console.log("request body",req.body);
 
   const validBasicInfo=await BasicInfo.findById(basicInfoId)
    
    console.log("valid basic info",validBasicInfo);
+  
+   console.log(validBasicInfo);
 
   if(!validBasicInfo){
     return next(new AppError("Id is Not Valid",400))
