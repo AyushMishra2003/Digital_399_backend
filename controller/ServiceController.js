@@ -142,7 +142,6 @@ const updateService = async (req, res, next) => {
 }
 
 
-
 const deleteService=async(req,res,next)=>{
 try{
 
@@ -174,6 +173,6 @@ export {
     addService,
     getAllService,
     getService,
-    updateService,
+    updateService, 
     deleteService
 }

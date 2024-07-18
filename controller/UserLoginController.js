@@ -35,7 +35,10 @@ export const requestLogin = async (req, res,next) => {
 
   try {
     await sendSms(phoneNumber, `Your verification code is: ${verificationCode}`);
-    res.status(200).send('Verification code sent via SMS.');
+    res.status(200).json({
+      success:true,
+      message:"Verification code sent via SMS."
+    })
   } catch (error) {
     console.error(error);
     res.status(500).send('Failed to send verification code.');
@@ -48,7 +51,10 @@ export const verifyCode = (req, res) => {
   console.log(req.body);
 
   if (!phoneNumber || !verificationCode) {
-    return res.status(400).send('Phone number and verification code are required.');
+     return res.status(400).json({
+      success:false,
+      message:"Phone number and verification code are required"
+     })
   }
 
   const storedCode = verificationCodes[phoneNumber];
@@ -56,8 +62,11 @@ export const verifyCode = (req, res) => {
   console.log(`Stored code for ${phoneNumber}: ${storedCode}`);
 
   if (storedCode && storedCode === verificationCode) {
-    delete verificationCodes[phoneNumber]; // Remove code after verification
-    res.status(200).send('Verification successful.');
+    delete verificationCodes[phoneNumber]; 
+    res.status(200).json({
+      success:true,
+      message:"Verification Succesfully"
+    })
   } else {
     res.status(400).send('Invalid verification code.');
   }
