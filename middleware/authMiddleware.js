@@ -8,8 +8,6 @@ const isLoggedIn = async (req, res, next) => {
         console.log(req.cookies); 
         const token = req.cookies.token; 
  
-        console.log(token); // Debugging token retrieval
- 
         if (!token) {
             return next(new AppError("Not LOG In,please login first"))
         }
