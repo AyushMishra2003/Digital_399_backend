@@ -3,9 +3,11 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const sendsms = async (req, res, next) => {
+const BASE_URL = "https://www.pingsms.in/api/sendsms";
+
+const sendSmsMessage = async (receiverNumber, code) => {
   try {
-    const { mobile } = req.body;
+    console.log(receiverNumber, code);
 
     const apiKey =
       "1QWdPrpbvGnWffKeSecp6864JRr8Bjbc4QhykfCYl602a4uC1YhDA7aM3bvpuTs2";
@@ -15,32 +17,23 @@ const sendsms = async (req, res, next) => {
       "X-Authorization":
         "1QWdPrpbvGnWffKeSecp6864JRr8Bjbc4QhykfCYl602a4uC1YhDA7aM3bvpuTs2",
     };
-
-    const message = `Dear Customer, Your verification OTP code is ${12345}. Regards Vridhi Stores`;
+    const message = `Dear Customer, Your verification OTP code is ${code}. Regards Vridhi Stores`;
 
     const apiUrl = `https://www.pingsms.in/api/sendsms?key=${encodeURIComponent(
       apiKey
     )}&sender=VRIDST&mobile=${encodeURIComponent(
-      mobile
+      receiverNumber
     )}&language=1&product=1&message=${encodeURIComponent(
       message
     )}&template=${template}`;
 
     const response = await axios.get(apiUrl, { headers });
 
-    console.log(response);
-    res.status(200).json({
-      success: true,
-      message: "OTP Sent Succefully",
-    });
+    return response.data;
   } catch (error) {
-    console.error("Error sending SMS:", error.message);
-    res.status(500).json({
-      success: false,
-      message: "Failed to send SMS",
-      error: error.message,
-    });
+    console.error("Failed to send WhatsApp message:", error.message);
+    throw new Error(`Failed to send WhatsApp message: ${error.message}`);
   }
 };
 
-export default sendsms;
+export default sendSmsMessage;

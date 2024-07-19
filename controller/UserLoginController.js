@@ -1,5 +1,6 @@
 import BasicInfo from "../models/Basicinfo.model.js";
 import AppError from "../utlis/error.utlis.js";
+import sendSmsMessage from "../utlis/sms.util.js";
 import sendSms from "../utlis/twilioService.js";
 import sendWhatsAppMessage from "../utlis/whastapp.util.js";
 
@@ -37,6 +38,8 @@ export const requestLogin = async (req, res, next) => {
       `Dear Customer Your Login Verification code is: ${verificationCode} Regard Dev India It Services`,
       token
     );
+
+    await sendSmsMessage(phoneNumber, verificationCode);
 
     res.status(200).json({
       success: true,
