@@ -117,4 +117,22 @@ const deleteFeedBack = async (req, res, next) => {
   }
 };
 
-export { addFeedBack, getFeedBack, deleteFeedBack };
+const getAllTrashFeedback = async (req, res, next) => {
+  try {
+    const allTrashFeedback = await TrashFeedback.find({});
+
+    if (!allTrashFeedback) {
+      return next(new AppError("Delete Feedback Not Found", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "All Deleted Feedback are:-",
+      data: allTrashFeedback,
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 500));
+  }
+};
+
+export { addFeedBack, getFeedBack, deleteFeedBack, getAllTrashFeedback };

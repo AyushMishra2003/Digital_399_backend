@@ -212,10 +212,29 @@ const restoreEnquiry = async (req, res, next) => {
   }
 };
 
+const getTrashEnquiry = async (req, res, next) => {
+  try {
+    const allTrashEnquiry = await TrashInquiry.find({});
+
+    if (!allTrashEnquiry) {
+      return next(new AppError("Trash Enquiry Not Found", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Deleted Enquiry Reterive Succesfully",
+      data: allTrashEnquiry,
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 500));
+  }
+};
+
 export {
   addEnquiry,
   getEnquiry,
   deleteEnquiry,
   getSingleEnquiry,
   restoreEnquiry,
+  getTrashEnquiry,
 };
