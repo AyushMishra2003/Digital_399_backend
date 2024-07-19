@@ -1,11 +1,7 @@
-// loginController.js
-
 import BasicInfo from "../models/Basicinfo.model.js";
 import AppError from "../utlis/error.utlis.js";
 import sendSms from "../utlis/twilioService.js";
-
-
-
+import sendWhatsAppMessage from "../utlis/whastapp.util.js";
 
 let verificationCodes = {}; // Store verification codes temporarily
 
@@ -13,96 +9,98 @@ const generateVerificationCode = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-export const requestLogin = async (req, res,next) => {
+export const requestLogin = async (req, res, next) => {
   const { phoneNumber } = req.body;
 
   if (!phoneNumber) {
-    return res.status(400).send('Phone number is required.');
+    return res.status(400).send("Phone number is required.");
   }
- 
-   const basicInfo=await BasicInfo.findOne({phoneNumber})
-
-   if(!basicInfo){
-     return next(new AppError("Phone Number is Not Valid",404))
-   }
-
-   console.log(basicInfo);
-
-  const verificationCode = generateVerificationCode();
-  verificationCodes[phoneNumber] = verificationCode;
-
-  console.log(`Generated code for ${phoneNumber}: ${verificationCode}`);
 
   try {
-    await sendSms(phoneNumber, `Your verification code is: ${verificationCode}`);
+    const basicInfo = await BasicInfo.findOne({ phoneNumber });
+    console.log(basicInfo);
+    if (!basicInfo) {
+      return next(new AppError("Phone Number is Not Valid", 404));
+    }
+
+    console.log(basicInfo);
+
+    const verificationCode = generateVerificationCode();
+    verificationCodes[phoneNumber] = verificationCode;
+
+    console.log(`Generated code for ${phoneNumber}: ${verificationCode}`);
+
+    const token = "uCh3Ey5i3cd7AAR4nHm2";
+
+    await sendWhatsAppMessage(
+      phoneNumber,
+      `Dear Customer Your Login Verification code is: ${verificationCode} Regard Dev India It Services`,
+      token
+    );
+
     res.status(200).json({
-      success:true,
-      message:"Verification code sent via SMS."
-    })
+      success: true,
+      message: "Verification code sent via WhatsApp",
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).send('Failed to send verification code.');
+    res.status(500).send("Failed to send verification code.");
   }
 };
 
-export const verifyCode = async(req, res,next) => {
+export const verifyCode = async (req, res, next) => {
   const { phoneNumber, verificationCode } = req.body;
 
-  console.log(req.body);
+  try {
+    const storedCode = verificationCodes[phoneNumber];
 
-  if (!phoneNumber || !verificationCode) {
-     return res.status(400).json({
-      success:false,
-      message:"Phone number and verification code are required"
-     })
-  }
+    if (!storedCode || storedCode !== verificationCode) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid verification code.",
+      });
+    }
 
-  const storedCode = verificationCodes[phoneNumber];
-
-  console.log(`Stored code for ${phoneNumber}: ${storedCode}`);
-
-  if (storedCode && storedCode === verificationCode) {
-    delete verificationCodes[phoneNumber]; 
-    const basicInfo=await BasicInfo.findOne({phoneNumber})
+    const basicInfo = await BasicInfo.findOne({ phoneNumber });
     const token = await basicInfo.generateJWTToken();
 
+    basicInfo.token = token;
+    await basicInfo.save();
 
-    basicInfo.token=token
-    
+    console.log(`Generated token for ${phoneNumber}: ${token}`);
 
-    await basicInfo.save()
+    delete verificationCodes[phoneNumber];
 
-    console.log(basicInfo.token);
-    console.log(basicInfo);
-     res.cookie('token', token, {
+    res.cookie("token", token, {
       httpOnly: true,
       // secure: true, // Enable for HTTPS only
-      maxAge: 3600000, // Example: cookie expires in 1 hour (in milliseconds)
-      sameSite: 'strict' // Recommended to prevent CSRF
-     });
-
+      maxAge: 3600000,
+      sameSite: "strict",
+    });
 
     res.status(200).json({
-      success:true,
-      message:"Verification Succesfully"
-    })
-  } else {
-    res.status(400).send('Invalid verification code.');
+      success: true,
+      message: "Verification successful",
+    });
+  } catch (error) {
+    console.error("Error verifying code:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to verify code",
+      error: error.message,
+    });
   }
-}; 
+};
 
-
-
-export const Userlogout=(req,res)=>{
-
-  res.cookie('token',null,{
-      secure:true,
-      maxAge:0,
-      httpOnly:true
-  })
+export const Userlogout = (req, res) => {
+  res.cookie("token", null, {
+    secure: true,
+    maxAge: 0,
+    httpOnly: true,
+  });
 
   res.status(200).json({
-      success:true,
-      message:"User logged out successfully"
-  })
-}
+    success: true,
+    message: "User logged out successfully",
+  });
+};

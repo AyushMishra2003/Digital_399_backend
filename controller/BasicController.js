@@ -1,221 +1,227 @@
 import { error } from "console";
 import BasicInfo from "../models/Basicinfo.model.js";
 import AppError from "../utlis/error.utlis.js";
-import cloudinary from 'cloudinary'
-import fs from 'fs/promises'
+import cloudinary from "cloudinary";
+import fs from "fs/promises";
 import { rmSync } from "fs";
+import sendWhatsAppMessage from "../utlis/whastapp.util.js";
 
-const addBasicInfo=async(req,res,next)=>{
-try{
-
-const {companyLogo,companyName,companyOwner,phoneNumber,whastappNumber,address,email_id,aboutUs,isActive,isPaid}=req.body
-const existingUser = await BasicInfo.findOne({ phoneNumber });
-if (existingUser) {
-   return next(new AppError("Phone Number already Exist"))
-}
- 
-
-const basicinfo=await BasicInfo.create({
-     companyName,
-     companyOwner,
-     phoneNumber,
-     whastappNumber,
-     address,
-     email_id,
-     aboutUs,
-     companyLogo:{
-        public_id:"",
-        secure_url:""
-     },
-     isActive,
-     isPaid
- })
-
-
- console.log(basicinfo);
- if(req.file){
-    const result=await cloudinary.v2.uploader.upload(req.file.path,{
-        folder:'lms'
-    })
-    console.log(result);
-    if(result){
-        basicinfo.companyLogo.public_id=result.public_id,
-        basicinfo.companyLogo.secure_url=result.secure_url
+const addBasicInfo = async (req, res, next) => {
+  try {
+    const {
+      companyLogo,
+      companyName,
+      companyOwner,
+      phoneNumber,
+      whastappNumber,
+      address,
+      email_id,
+      aboutUs,
+      isActive,
+      isPaid,
+    } = req.body;
+    const existingUser = await BasicInfo.findOne({ phoneNumber });
+    if (existingUser) {
+      return next(new AppError("Phone Number already Exist"));
     }
-    fs.rm(`uploads/${req.file.filename}`)
-    console.log("c-4");
-}
- 
- if(!basicinfo){
-    return next(new AppError("BasicInfo not created",400))
- }
-  
- await basicinfo.save()
 
- res.status(200).json({
-    success:true,
-    message:"BasicInfo added",
-    data:basicinfo
- })
+    const basicinfo = await BasicInfo.create({
+      companyName,
+      companyOwner,
+      phoneNumber,
+      whastappNumber,
+      address,
+      email_id,
+      aboutUs,
+      companyLogo: {
+        public_id: "",
+        secure_url: "",
+      },
+      isActive,
+      isPaid,
+    });
 
-}catch(error){
-    return next(new AppError(error.message,500))
-}
-}
+    const token = "uCh3Ey5i3cd7AAR4nHm2";
 
-
-const getAllBasicInfo=async(req,res,next)=>{
-try{
-   const basicInfo=await BasicInfo.find({})
-
-   if(!basicInfo){
-    return next(new AppError("Basic Info not Found",400))
-   }
-
-   res.status(200).json({
-     success:true,
-     message:"All Basic Info are:-",
-     data:basicInfo
-   })
-
-}catch(error){
-    return next(new AppError(error.message,500))
-}
-}
-
-const getBasicInfo=async(req,res,next)=>{
-    try{
-       const {id}=req.params
-
-       const basicInfo=await BasicInfo.findById(id)
-
-       if(!basicInfo){
-        return next(new AppError("Basic Details Not Found",400))
-       }
-
-       res.status(200).json({
-         success:true,
-         message:"Basic Details retervied Succesfully",
-         data:basicInfo
-       })
-
-    }catch(error){
-        return next(new AppError(error.message,500))
+    console.log(basicinfo);
+    if (req.file) {
+      const result = await cloudinary.v2.uploader.upload(req.file.path, {
+        folder: "lms",
+      });
+      console.log(result);
+      if (result) {
+        (basicinfo.companyLogo.public_id = result.public_id),
+          (basicinfo.companyLogo.secure_url = result.secure_url);
+      }
+      fs.rm(`uploads/${req.file.filename}`);
+      console.log("c-4");
     }
-}
 
-const updateBasicInfo=async(req,res,next)=>{
-try{
-  const {id}=req.params
+    if (!basicinfo) {
+      return next(new AppError("BasicInfo not created", 400));
+    }
 
-  const basicInfo=await BasicInfo.findById(id)
+    await sendWhatsAppMessage(
+      phoneNumber,
+      `Dear Customer Your registration is successful, with Whatsapp Number ${phoneNumber} and Email id is ${email_id} `,
+      token
+    );
 
-  if(!basicInfo){
-    return next(new AppError("BasicInfo not Found",400))
+    await basicinfo.save();
+
+    res.status(200).json({
+      success: true,
+      message: "BasicInfo added",
+      data: basicinfo,
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 500));
   }
-  
+};
 
-  const updatedBasicInfo=await BasicInfo.findByIdAndUpdate(
-    id,
-    {
-        $set:req.body
-    },
-    {
-       runValidators:true
+const getAllBasicInfo = async (req, res, next) => {
+  try {
+    const basicInfo = await BasicInfo.find({});
+
+    if (!basicInfo) {
+      return next(new AppError("Basic Info not Found", 400));
     }
-  )
 
-  console.log(updatedBasicInfo);
+    res.status(200).json({
+      success: true,
+      message: "All Basic Info are:-",
+      data: basicInfo,
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 500));
+  }
+};
 
-  if(req.file){
-    const result=await cloudinary.v2.uploader.upload(req.file.path,{
-        folder:'lms'
-    })
-    console.log(result);
-    if(result){
-        updatedBasicInfo.companyLogo.public_id=result.public_id,
-        updatedBasicInfo.companyLogo.secure_url=result.secure_url
+const getBasicInfo = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const basicInfo = await BasicInfo.findById(id);
+
+    if (!basicInfo) {
+      return next(new AppError("Basic Details Not Found", 400));
     }
-    fs.rm(`uploads/${req.file.filename}`)
+
+    res.status(200).json({
+      success: true,
+      message: "Basic Details retervied Succesfully",
+      data: basicInfo,
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 500));
   }
+};
 
+const updateBasicInfo = async (req, res, next) => {
+  try {
+    const { id } = req.params;
 
-//   await updateBasicInfo.save()
+    const basicInfo = await BasicInfo.findById(id);
 
-  res.status(200).json({
-    success:true,
-    message:"Basic Info Updated Succesfully",
-  })
+    if (!basicInfo) {
+      return next(new AppError("BasicInfo not Found", 400));
+    }
 
-}catch(error){
-    return next(new AppError(error.message,500))
-}
-}
+    const updatedBasicInfo = await BasicInfo.findByIdAndUpdate(
+      id,
+      {
+        $set: req.body,
+      },
+      {
+        runValidators: true,
+      }
+    );
 
-const deleteBasicInfo=async(req,res,next)=>{
-  try{
-  const {id}=req.params
+    console.log(updatedBasicInfo);
 
-  const basicInfo=await BasicInfo.findById(id)
+    if (req.file) {
+      const result = await cloudinary.v2.uploader.upload(req.file.path, {
+        folder: "lms",
+      });
+      console.log(result);
+      if (result) {
+        (updatedBasicInfo.companyLogo.public_id = result.public_id),
+          (updatedBasicInfo.companyLogo.secure_url = result.secure_url);
+      }
+      fs.rm(`uploads/${req.file.filename}`);
+    }
 
-  if(!basicInfo){
-    return next(new AppError("BasicInformation Not Found",400))
+    //   await updateBasicInfo.save()
+
+    res.status(200).json({
+      success: true,
+      message: "Basic Info Updated Succesfully",
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 500));
   }
+};
 
-  await BasicInfo.findByIdAndDelete(id)
+const deleteBasicInfo = async (req, res, next) => {
+  try {
+    const { id } = req.params;
 
-  res.status(200).json({
-    success:true,
-    message:"Basic Information Delete Succesfully"
-  })
-}catch(error){
-  return next(new AppError(error.message,500))
-}
-}
+    const basicInfo = await BasicInfo.findById(id);
 
-const isActive=async(req,res,next)=>{
-  try{
-     
-    const {id}=req.params
+    if (!basicInfo) {
+      return next(new AppError("BasicInformation Not Found", 400));
+    }
 
-    const basicInfo=await BasicInfo.findById(id)
+    await BasicInfo.findByIdAndDelete(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Basic Information Delete Succesfully",
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 500));
+  }
+};
+
+const isActive = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const basicInfo = await BasicInfo.findById(id);
 
     console.log(basicInfo);
 
-    if(!basicInfo){
-       return next(new AppError("Basic Information Not Found",400))
-    }
-    
-   console.log(basicInfo);
-   console.log(basicInfo.isActive);
-
-    if(basicInfo.isActive==="ACTIVE"){
-        console.log("mujhse bula diya");
-       basicInfo.isActive="DEACTIVE"
-    }else{
-         basicInfo.isActive="ACTIVE"
+    if (!basicInfo) {
+      return next(new AppError("Basic Information Not Found", 400));
     }
 
-    await basicInfo.save()
+    console.log(basicInfo);
+    console.log(basicInfo.isActive);
+
+    if (basicInfo.isActive === "ACTIVE") {
+      console.log("mujhse bula diya");
+      basicInfo.isActive = "DEACTIVE";
+    } else {
+      basicInfo.isActive = "ACTIVE";
+    }
+
+    await basicInfo.save();
 
     res.status(200).json({
-      success:true,
-      message:"Basic information updated",
-      data:basicInfo
-    })
-  
-  }catch(error){
-    return next(new AppError(error.message,500))
+      success: true,
+      message: "Basic information updated",
+      data: basicInfo,
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 500));
   }
-}
-
-
+};
 
 export {
-    addBasicInfo,
-    getAllBasicInfo,
-    getBasicInfo,
-    updateBasicInfo,
-    deleteBasicInfo,
-    isActive
-}
+  addBasicInfo,
+  getAllBasicInfo,
+  getBasicInfo,
+  updateBasicInfo,
+  deleteBasicInfo,
+  isActive,
+};
