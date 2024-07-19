@@ -13,9 +13,7 @@ const sendsms = async (req, res, next) => {
 
     const message = `Dear Customer, Your verification OTP code is ${12345}. Regards Vridhi Stores`;
 
-    const apiUrl = `https://www.pingsms.in/api/sendsms?key=${apiKey}&sender=VRIDST&mobile=${mobile}&language=1&product=1&message=${encodeURIComponent(
-      message
-    )}&template=${template}`;
+    const apiUrl = `https://www.pingsms.in/api/sendsms?key=${apiKey}&sender=VRIDST&mobile=${mobile}&language=1&product=1&message=${message}&template=${template}`;
 
     const response = await axios.get(apiUrl);
 
