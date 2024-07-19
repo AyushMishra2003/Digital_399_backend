@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-const feedBackSchema = new Schema(
+const TrashfeedBackSchema = new Schema(
   {
     feedBackStar: {
       type: Number,
@@ -12,12 +12,15 @@ const feedBackSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "BasicInfo",
     },
+    feedbackId: {
+      type: String,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const Feedback = model("FeedBack", feedBackSchema);
+const TrashFeedback = model("TrashFeedBack", TrashfeedBackSchema);
 
-export default Feedback;
+export default TrashFeedback;

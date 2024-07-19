@@ -1,14 +1,19 @@
-import {Router} from 'express'
-import { addEnquiry, deleteEnquiry, getEnquiry, getSingleEnquiry } from '../controller/enquiryController.js'
+import { Router } from "express";
+import {
+  addEnquiry,
+  deleteEnquiry,
+  getEnquiry,
+  getSingleEnquiry,
+  restoreEnquiry,
+} from "../controller/enquiryController.js";
+import { isLoggedIn } from "../middleware/authMiddleware.js";
 
+const enquiryRouter = Router();
 
-const enquiryRouter=Router()
+enquiryRouter.post("/", isLoggedIn, addEnquiry);
+enquiryRouter.get("/", isLoggedIn, getEnquiry);
+enquiryRouter.get("/single", isLoggedIn, getSingleEnquiry);
+enquiryRouter.delete("/", isLoggedIn, deleteEnquiry);
+enquiryRouter.post("/restore", isLoggedIn, restoreEnquiry);
 
-enquiryRouter.post("/",addEnquiry)
-enquiryRouter.get("/",getEnquiry)
-enquiryRouter.get("/single/:id",getSingleEnquiry)
-enquiryRouter.delete("/:id",deleteEnquiry)
-
-
-
-export default enquiryRouter
+export default enquiryRouter;

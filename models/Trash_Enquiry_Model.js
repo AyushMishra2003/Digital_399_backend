@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-const enquirySchema = new Schema(
+const TrashEnquirySchema = new Schema(
   {
     inquiryName: {
       type: String,
@@ -22,12 +22,15 @@ const enquirySchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "BasicInfo",
     },
+    inquiryId: {
+      type: String,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const Inquiry = model("INQUIRY", enquirySchema);
+const TrashInquiry = model("TRASH_INQUIRY", TrashEnquirySchema);
 
-export default Inquiry;
+export default TrashInquiry;
