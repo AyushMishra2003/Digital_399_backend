@@ -17,7 +17,7 @@ const sendsms = async (req, res, next) => {
       message
     )}&template=${template}`;
 
-    const response = await axios.post(apiUrl);
+    const response = await axios.get(apiUrl);
 
     console.log(response);
 
