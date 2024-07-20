@@ -5,6 +5,7 @@ import cloudinary from "cloudinary";
 import fs from "fs/promises";
 import { rmSync } from "fs";
 import sendWhatsAppMessage from "../utlis/whastapp.util.js";
+import CodeExpire from "../models/codeExpire.model.js";
 
 const addBasicInfo = async (req, res, next) => {
   try {
@@ -20,9 +21,35 @@ const addBasicInfo = async (req, res, next) => {
       isActive,
       isPaid,
     } = req.body;
+
+    if (new Date(expiryTime) > new Date(currentTime)) {
+      console.log("bholenath");
+    } else {
+      console.log("narayan");
+    }
+
     const existingUser = await BasicInfo.findOne({ phoneNumber });
+
+    console.log(phoneNumber.toString().length);
+
+    if (phoneNumber.toString().length != 10) {
+      return next(new AppError("Phone Number must be 10digits ", 400));
+    }
+
     if (existingUser) {
       return next(new AppError("Phone Number already Exist"));
+    }
+
+    const existingWhastapp = await BasicInfo.findOne({ whastappNumber });
+
+    if (existingWhastapp) {
+      return next(new AppError("Whastapp Number already Exist"));
+    }
+
+    const existingEmail = await BasicInfo.findOne({ email_id });
+
+    if (existingEmail) {
+      return next(new AppError("Email id is Already Exist"));
     }
 
     const basicinfo = await BasicInfo.create({
@@ -62,7 +89,7 @@ const addBasicInfo = async (req, res, next) => {
     }
 
     await sendWhatsAppMessage(
-      phoneNumber,
+      `${"91"}${phoneNumber}`,
       `Dear Customer Your registration is successful, with Whatsapp Number ${phoneNumber} and Email id is ${email_id} `,
       token
     );
@@ -217,6 +244,32 @@ const isActive = async (req, res, next) => {
   }
 };
 
+const addCode = async (req, res, next) => {
+  try {
+    const verificationCode = "134556";
+    const mobileNumber = 6388291292;
+
+    const verifyCode = await CodeExpire.create({
+      verificationCode,
+      mobileNumber,
+    });
+
+    if (!verificationCode) {
+      return next(new AppError("Not Created", 400));
+    }
+
+    await verifyCode.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Code Verify",
+      data: verificationCode,
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 500));
+  }
+};
+
 export {
   addBasicInfo,
   getAllBasicInfo,
@@ -224,4 +277,5 @@ export {
   updateBasicInfo,
   deleteBasicInfo,
   isActive,
+  addCode,
 };

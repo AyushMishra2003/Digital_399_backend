@@ -1,4 +1,5 @@
 import BasicInfo from "../models/Basicinfo.model.js";
+import CodeExpire from "../models/codeExpire.model.js";
 import AppError from "../utlis/error.utlis.js";
 import sendSmsMessage from "../utlis/sms.util.js";
 import sendSms from "../utlis/twilioService.js";
@@ -19,49 +20,73 @@ export const requestLogin = async (req, res, next) => {
 
   try {
     const basicInfo = await BasicInfo.findOne({ phoneNumber });
-    console.log(basicInfo);
     if (!basicInfo) {
       return next(new AppError("Phone Number is Not Valid", 404));
     }
 
-    console.log(basicInfo);
-
     const verificationCode = generateVerificationCode();
     verificationCodes[phoneNumber] = verificationCode;
-
-    console.log(`Generated code for ${phoneNumber}: ${verificationCode}`);
 
     const token = "uCh3Ey5i3cd7AAR4nHm2";
 
     await sendWhatsAppMessage(
-      phoneNumber,
-      `Dear Customer Your Login Verification code is: ${verificationCode} Regard Dev India It Services`,
+      `${"91"}${phoneNumber}`,
+      `Dear Customer Your Login Verification code is: ${verificationCode} and expired in 5 Minutes Regard Dev India It Services`,
       token
     );
 
-    await sendSmsMessage(phoneNumber, verificationCode);
+    await sendSmsMessage(`${"91"}${phoneNumber}`, verificationCode);
+
+    const validCodeData = await CodeExpire.findOne({ phoneNumber });
+
+    if (validCodeData) {
+      validCodeData.verificationCode = verificationCode;
+      await validCodeData.save();
+    } else {
+      const codeData = await CodeExpire.create({
+        verificationCode,
+        phoneNumber,
+        expiryTime: Date.now() + 5 * 60 * 1000,
+      });
+      await codeData.save();
+    }
 
     res.status(200).json({
       success: true,
-      message: "Verification code sent via WhatsApp",
+      message: "Verification code sent Succesfully",
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Failed to send verification code.");
+    return next(new AppError("Failed to Send Verification Code", 500));
   }
 };
 
 export const verifyCode = async (req, res, next) => {
-  const { phoneNumber, verificationCode } = req.body;
-
   try {
-    const storedCode = verificationCodes[phoneNumber];
+    const { phoneNumber, verificationCode } = req.body;
 
-    if (!storedCode || storedCode !== verificationCode) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid verification code.",
-      });
+    const ValidBasicInfo = await BasicInfo.findOne({ phoneNumber });
+
+    if (!ValidBasicInfo) {
+      return next(new AppError("Phone Number is Not Valid", 400));
+    }
+
+    const ValidCodeExpire = await CodeExpire.findOne({ phoneNumber });
+
+    if (!ValidCodeExpire) {
+      return next(
+        new AppError("Your Code is Expired or Something Went Wrong", 400)
+      );
+    }
+
+    const currentTime = Date.now();
+
+    if (currentTime > ValidCodeExpire.expiryTime) {
+      return next(new AppError("Your Code is Expired", 400));
+    }
+
+    if (verificationCode != ValidCodeExpire.verificationCode) {
+      return next(new AppError("Code is Not Valid", 400));
     }
 
     const basicInfo = await BasicInfo.findOne({ phoneNumber });
@@ -73,6 +98,8 @@ export const verifyCode = async (req, res, next) => {
     console.log(`Generated token for ${phoneNumber}: ${token}`);
 
     delete verificationCodes[phoneNumber];
+
+    await CodeExpire.findOneAndDelete({ phoneNumber });
 
     res.cookie("token", token, {
       httpOnly: true,

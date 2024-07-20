@@ -31,8 +31,7 @@ const BasicSchema = new Schema(
       unique: true,
     },
     address: {
-      type: Array,
-      default: [],
+      type: String,
     },
     email_id: {
       type: String,

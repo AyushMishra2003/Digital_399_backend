@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   addBasicInfo,
+  addCode,
   deleteBasicInfo,
   getAllBasicInfo,
   getBasicInfo,
@@ -18,5 +19,6 @@ basicRoute.get("/:id", getBasicInfo);
 basicRoute.put("/:id", upload.single("companyLogo"), updateBasicInfo);
 basicRoute.delete("/:id", deleteBasicInfo);
 basicRoute.put("/active/:id", isActive);
+basicRoute.post("/check", addCode);
 
 export default basicRoute;
