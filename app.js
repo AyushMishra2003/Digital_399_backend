@@ -15,6 +15,7 @@ import operatorRoute from "./routes/Operator.route.js";
 import couponRouter from "./routes/coupon.routes.js";
 import LoginUserrouter from "./routes/userLogin.routes.js";
 import dotenv from "dotenv";
+import TicketRouter from "./routes/Ticket.route.js";
 
 dotenv.config();
 
@@ -54,6 +55,7 @@ app.use("/api/v1/message", conversationRoute);
 app.use("/api/v1/operator", operatorRoute);
 app.use("/api/v1/coupon", couponRouter);
 app.use("/api/v1/userLogin", LoginUserrouter);
+app.use("/api/v1/ticket", TicketRouter);
 
 app.use(errorMiddleware);
 
