@@ -10,12 +10,15 @@ const addTicket = async (req, res, next) => {
   try {
     const { purpose, message, basic_info_id, processingLevel } = req.body;
 
-    console.log(req.body);
-
     const validCustomer = await BasicInfo.findById(basic_info_id);
 
     if (!validCustomer) {
       return next(new AppError("Customer is Not Valid", 400));
+    }
+
+    const token = req.cookies.token;
+    if (token != validCustomer.token) {
+      return next(new AppError("You are Not Authrized", 400));
     }
 
     const ticket = await Ticket.create({
@@ -59,8 +62,6 @@ const addTicket = async (req, res, next) => {
 const AllOpenTicket = async (req, res, next) => {
   try {
     const { basic_info_id } = req.body;
-
-    console.log(req.body);
 
     const validCustomer = await BasicInfo.findById(basic_info_id);
 
@@ -147,7 +148,10 @@ const AllProcessingTicket = async (req, res, next) => {
 
 const replyTicket = async (req, res, next) => {
   try {
-    const { ticket_Id, message, replyBy } = req.body;
+    const { ticket_Id, message, replyBy, photo } = req.body;
+
+    console.log(req.body);
+    console.log(ticket_Id);
 
     const validTicket = await Ticket.findById(ticket_Id);
 
@@ -155,11 +159,11 @@ const replyTicket = async (req, res, next) => {
       return next(new AppError("Ticket is Not Valid", 400));
     }
 
-    if (validTicket.processingLevel === "Closed") {
-      return next(
-        new AppError("Ticket is Already Solved,raised new Ticket", 400)
-      );
-    }
+    // if (validTicket.processingLevel === "Closed") {
+    //   return next(
+    //     new AppError("Ticket is Already Solved,raised new Ticket", 400)
+    //   );
+    // }
 
     const by = parseInt(replyBy) === 1 ? "ADMIN" : "Customer";
     const currentDate = new Date();
@@ -195,6 +199,8 @@ const replyTicket = async (req, res, next) => {
 
     validTicket.replyMessage.push(ticketReply);
     validTicket.processingLevel = "Processing";
+
+    console.log(validTicket);
 
     await validTicket.save();
 
@@ -268,6 +274,24 @@ const singleViewTicket = async (req, res, next) => {
   }
 };
 
+const getAllTicket = async (req, res, next) => {
+  try {
+    const allTicket = await Ticket.find({});
+
+    if (!allTicket) {
+      return next(new AppError("Ticket is not Valid", 400));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "All Ticket Are:-",
+      data: allTicket,
+    });
+  } catch (error) {
+    return next(new AppError(error.message, 500));
+  }
+};
+
 export {
   addTicket,
   AllOpenTicket,
@@ -276,4 +300,5 @@ export {
   replyTicket,
   closeTicket,
   singleViewTicket,
+  getAllTicket,
 };
