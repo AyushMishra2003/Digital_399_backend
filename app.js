@@ -1,6 +1,7 @@
 import express from "express";
+import http from "http";
+import { Server } from "socket.io";
 import cookieParser from "cookie-parser";
-import { config } from "dotenv";
 import morgan from "morgan";
 import basicRoute from "./routes/basic.route.js";
 import serviceRoute from "./routes/service.routes.js";
@@ -20,11 +21,16 @@ import TicketRouter from "./routes/Ticket.route.js";
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
 
 // Middleware
 app.use(cookieParser());
 app.use(express.json());
-
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev")); // Logging requests to the console
 
@@ -44,6 +50,7 @@ app.use((req, res, next) => {
   next();
 });
 
+// Routes
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/basicInfo", basicRoute);
 app.use("/api/v1/service", serviceRoute);
@@ -57,9 +64,25 @@ app.use("/api/v1/coupon", couponRouter);
 app.use("/api/v1/userLogin", LoginUserrouter);
 app.use("/api/v1/ticket", TicketRouter);
 
+// Error handling middleware
 app.use(errorMiddleware);
 
-// Default route for testing server
+// Socket.IO connection handling
+io.on("connection", (socket) => {
+  console.log(`Socket connected: ${socket.id}`);
+
+  // Example of handling a custom event
+  socket.on("chat message", (msg) => {
+    console.log(`Message received: ${msg}`);
+    io.emit("chat message", msg); // Broadcast the message to all connected clients
+  });
+
+  // Handle disconnects
+  socket.on("disconnect", () => {
+    console.log(`Socket disconnected: ${socket.id}`);
+  });
+});
+
 app.get("/", (req, res) => {
   res.status(200).json({
     message: "Server is running and ready.",
@@ -78,5 +101,4 @@ app.all("*", (req, res) => {
   });
 });
 
-// Export the Express app instance
-export default app;
+export { app, server, io };

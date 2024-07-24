@@ -5,6 +5,7 @@ import cloudinary from "cloudinary";
 import fs from "fs/promises";
 import { rmSync } from "fs";
 import TicketReply from "../models/Ticket_Reply.model.js";
+import { io } from "../app.js";
 
 const addTicket = async (req, res, next) => {
   try {
@@ -16,12 +17,12 @@ const addTicket = async (req, res, next) => {
       return next(new AppError("Customer is Not Valid", 400));
     }
 
-    const token = req.cookies.token;
-    if (token != validCustomer.token) {
-      return next(new AppError("You are Not Authrized", 400));
-    }
+    // const token = req.cookies.token;
+    // if (token != validCustomer.token) {
+    //   return next(new AppError("You are Not Authorized", 400));
+    // }
 
-    const ticket = await Ticket.create({
+    let ticket = await Ticket.create({
       purpose,
       message,
       basic_info_id,
@@ -32,26 +33,28 @@ const addTicket = async (req, res, next) => {
         folder: "lms",
       });
       if (result) {
-        (ticket.screenShot.public_id = result.public_id),
-          (ticket.screenShot.secure_url = result.secure_url);
+        ticket.screenShot.public_id = result.public_id;
+        ticket.screenShot.secure_url = result.secure_url;
       }
-      fs.rm(`uploads/${req.file.filename}`);
+      await fs.rm(`uploads/${req.file.filename}`);
     }
 
     if (!ticket) {
-      return next(new AppError("Ticket is Not Valid", 400));
+      return next(new AppError("Ticket could not be created", 400));
     }
+
     if (processingLevel) {
-      console.log("hlo processing level");
       ticket.processingLevel = processingLevel;
-      console.log(ticket);
     }
 
     await ticket.save();
 
+    // Emit event to Socket.IO clients that a new ticket has been added
+    io.emit("ticketAdded", ticket);
+
     res.status(200).json({
       success: true,
-      message: "Ticket Added Succesfully",
+      message: "Ticket Added Successfully",
       data: ticket,
     });
   } catch (error) {
@@ -151,19 +154,14 @@ const replyTicket = async (req, res, next) => {
     const { ticket_Id, message, replyBy, photo } = req.body;
 
     console.log(req.body);
-    console.log(ticket_Id);
 
     const validTicket = await Ticket.findById(ticket_Id);
+
+    console.log(validTicket);
 
     if (!validTicket) {
       return next(new AppError("Ticket is Not Valid", 400));
     }
-
-    // if (validTicket.processingLevel === "Closed") {
-    //   return next(
-    //     new AppError("Ticket is Already Solved,raised new Ticket", 400)
-    //   );
-    // }
 
     const by = parseInt(replyBy) === 1 ? "ADMIN" : "Customer";
     const currentDate = new Date();
@@ -191,8 +189,8 @@ const replyTicket = async (req, res, next) => {
         folder: "lms",
       });
       if (result) {
-        (ticketReply.photo.public_id = result.public_id),
-          (ticketReply.photo.secure_url = result.secure_url);
+        ticketReply.photo.public_id = result.public_id;
+        ticketReply.photo.secure_url = result.secure_url;
       }
       fs.rm(`uploads/${req.file.filename}`);
     }
@@ -200,23 +198,26 @@ const replyTicket = async (req, res, next) => {
     validTicket.replyMessage.push(ticketReply);
     validTicket.processingLevel = "Processing";
 
-    console.log(validTicket);
-
     await validTicket.save();
+
+    // Emit event to Socket.IO clients that a new reply has been added to a ticket
+    io.emit("ticketReplied", ticketReply);
 
     res.status(200).json({
       success: true,
-      message: "Reply Sent Succesfully",
+      message: "Reply Sent Successfully",
       data: ticketReply,
     });
   } catch (error) {
-    return next(error.message, 500);
+    return next(new AppError(error.message, 500));
   }
 };
 
 const closeTicket = async (req, res, next) => {
   try {
     const { id, ticketId } = req.body;
+
+    console.log(req.body);
 
     const validBasic = await BasicInfo.findById(id);
 
@@ -230,9 +231,9 @@ const closeTicket = async (req, res, next) => {
       return next(new AppError("Ticket is Not found", 400));
     }
 
-    if (validTicket.processingLevel === "Closed") {
-      return next(new AppError("Ticket is Already Closed", 400));
-    }
+    // if (validTicket.processingLevel === "Closed") {
+    //   return next(new AppError("Ticket is Already Closed", 400));
+    // }
 
     validTicket.processingLevel = "Closed";
 
@@ -240,7 +241,7 @@ const closeTicket = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: "Ticket Solved Succesfully",
+      message: "Ticket is Closed Succesfully",
     });
   } catch (error) {
     return next(new AppError(error.message, 500));
@@ -249,13 +250,16 @@ const closeTicket = async (req, res, next) => {
 
 const singleViewTicket = async (req, res, next) => {
   try {
-    const { basic_info_id } = req.body;
+    const { id } = req.params;
+    console.log(id);
 
-    const validBasic = await BasicInfo.findById(basic_info_id);
+    const validBasic = await BasicInfo.findById(id);
 
     if (!validBasic) {
       return next(new AppError("Customer is Not Valid", 400));
     }
+
+    const basic_info_id = id;
 
     const validTicket = await Ticket.findOne({ basic_info_id });
 
