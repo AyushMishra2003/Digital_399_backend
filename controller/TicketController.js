@@ -173,6 +173,24 @@ const replyTicket = async (req, res, next) => {
       currentDate.toISOString().slice(14, 16) + // Minutes
       currentDate.toISOString().slice(17, 19); // Seconds
 
+    const now = new Date();
+    const istTime = new Date(
+      now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+    );
+    const hours = istTime.getHours();
+    const minutes = istTime.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const formattedHours = hours % 12 || 12;
+    const formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
+    const formattedTime = `${formattedHours}:${formattedMinutes} ${ampm}`;
+
+    console.log(formattedTime);
+    console.log(now.getDate());
+    console.log(now.getMonth());
+    console.log(now.getFullYear());
+
+    const currentDate1 = `${now.getDate()}-${now.getMonth()}-${now.getFullYear()}`;
+
     const ticketReply = {
       ticket_Id,
       message,
@@ -182,6 +200,8 @@ const replyTicket = async (req, res, next) => {
         public_id: "",
         secure_url: "",
       },
+      date: currentDate1,
+      time: formattedTime,
     };
 
     if (req.file) {

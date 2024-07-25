@@ -22,12 +22,6 @@ const addBasicInfo = async (req, res, next) => {
       isPaid,
     } = req.body;
 
-    if (new Date(expiryTime) > new Date(currentTime)) {
-      console.log("bholenath");
-    } else {
-      console.log("narayan");
-    }
-
     const existingUser = await BasicInfo.findOne({ phoneNumber });
 
     console.log(phoneNumber.toString().length);

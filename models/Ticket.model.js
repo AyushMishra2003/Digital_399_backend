@@ -58,6 +58,12 @@ const ticketSchema = new Schema(
         replyId: {
           type: String,
         },
+        date: {
+          type: String,
+        },
+        time: {
+          type: String,
+        },
       },
     ],
   },
