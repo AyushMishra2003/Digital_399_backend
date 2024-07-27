@@ -6,7 +6,6 @@ import fs from "fs/promises";
 import { rmSync } from "fs";
 import TicketReply from "../models/Ticket_Reply.model.js";
 import { io } from "../app.js";
-
 const addTicket = async (req, res, next) => {
   try {
     const { purpose, message, basic_info_id, processingLevel } = req.body;

@@ -72,7 +72,7 @@ io.on("connection", (socket) => {
   console.log(`Socket connected: ${socket.id}`);
 
   // Example of handling a custom event
-  socket.on("chat message", (msg) => {
+  socket.on("chat-message", (msg) => {
     console.log(`Message received: ${msg}`);
     io.emit("chat message", msg); // Broadcast the message to all connected clients
   });
