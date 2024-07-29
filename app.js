@@ -69,6 +69,11 @@ app.use("/api/v1/chat", userroute);
 // Error handling middleware
 app.use(errorMiddleware);
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "Server is running and ready.",
+  });
+});
 // Catch-all route for undefined endpoints
 app.all("*", (req, res) => {
   res.status(404).json({
@@ -141,13 +146,6 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log(`User Disconnected: ${socket.id}`);
-  });
-});
-
-// Default route
-app.get("/", (req, res) => {
-  res.status(200).json({
-    message: "Server is running and ready.",
   });
 });
 
