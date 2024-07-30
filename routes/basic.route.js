@@ -8,7 +8,7 @@ import {
   isActive,
   updateBasicInfo,
 } from "../controller/BasicController.js";
-import upload from "../middleware/multer.middleware.js";
+import { upload } from "../middleware/multer.middleware.js";
 import { isLoggedIn } from "../middleware/authMiddleware.js";
 
 const basicRoute = Router();

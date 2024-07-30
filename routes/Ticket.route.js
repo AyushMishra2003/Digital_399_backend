@@ -9,7 +9,7 @@ import {
   replyTicket,
   singleViewTicket,
 } from "../controller/TicketController.js";
-import upload from "../middleware/multer.middleware.js";
+import { upload } from "../middleware/multer.middleware.js";
 import { isLoggedIn } from "../middleware/authMiddleware.js";
 const TicketRouter = Router();
 

@@ -13,8 +13,16 @@ const messageSchema = new mongoose.Schema({
   },
   content: {
     type: String,
-    required: true,
     trim: true,
+    default: "",
+  },
+  images: {
+    public_id: {
+      type: String,
+    },
+    secure_url: {
+      type: String,
+    },
   },
   timestamp: {
     type: Date,

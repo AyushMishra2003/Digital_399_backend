@@ -1,52 +1,76 @@
 import multer from "multer";
+import { v2 as cloudinary } from "cloudinary";
+import { Readable } from "stream";
 import path from "path";
 import mime from "mime-types";
 
-// Multer configuration for storing files
-const storage = multer.diskStorage({
-  destination: function (_req, _file, cb) {
-    cb(null, "uploads/"); // Destination folder where uploaded files will be stored
-  },
-  filename: function (_req, file, cb) {
-    cb(null, file.originalname); // Keep original file name
+// Multer setup to store files in memory
+const storage = multer.memoryStorage();
+
+const upload = multer({
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const mimeType = mime.lookup(file.originalname);
+
+    // Allowed file extensions and MIME types
+    const allowedExtensions = [
+      ".jpeg",
+      ".jpg",
+      ".png",
+      ".pdf",
+      ".txt",
+      ".doc",
+      ".docx",
+      ".zip",
+    ];
+    const allowedMimeTypes = [
+      "image/jpeg",
+      "image/png",
+      "application/pdf",
+      "text/plain",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/zip",
+    ];
+
+    if (
+      !allowedExtensions.includes(ext) &&
+      !allowedMimeTypes.includes(mimeType)
+    ) {
+      return cb(
+        new Error(
+          "Only JPEG, JPG, PNG, PDF, TXT, DOC, DOCX, and ZIP files are allowed"
+        )
+      );
+    }
+    cb(null, true);
   },
 });
 
-// File filter for Multer to accept various file types
-const fileFilter = (_req, file, cb) => {
-  const ext = path.extname(file.originalname).toLowerCase();
-  const mimeType = mime.lookup(file.originalname); // Get MIME type
-
-  // console.log('File:', file.originalname);
-  // console.log('Extension:', ext);
-  // console.log('MIME Type:', mimeType);
-
-  if (
-    ext !== ".xlsx" &&
-    ext !== ".xls" &&
-    ext !== ".jpeg" &&
-    ext !== ".jpg" &&
-    ext !== ".png" &&
-    ext !== ".pdf" &&
-    ext !== ".txt" &&
-    ext !== ".doc" &&
-    ext !== ".docx" &&
-    mimeType !== "application/pdf" &&
-    mimeType !== "application/msword" &&
-    mimeType !==
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document" &&
-    mimeType !== "application/zip"
-  ) {
-    return cb(
-      new Error(
-        "Only Excel, JPEG, JPG, PNG, PDF, DOC, DOCX, and ZIP files are allowed"
-      )
+// Function to upload file to Cloudinary
+const uploadToCloudinary = (file) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { resource_type: "auto" },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
     );
-  }
-  cb(null, true);
+
+    // Create a readable stream from the buffer
+    const readableStream = new Readable();
+    readableStream._read = () => {}; // Implement _read method for the stream
+
+    // Convert ArrayBuffer to Buffer
+    const buffer = Buffer.from(file.buffer);
+
+    readableStream.push(buffer);
+    readableStream.push(null); // End the stream
+
+    readableStream.pipe(stream);
+  });
 };
 
-// Initialize Multer instance with storage and fileFilter
-const upload = multer({ storage: storage, fileFilter: fileFilter });
-
-export default upload;
+export { upload, uploadToCloudinary };

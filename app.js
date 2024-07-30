@@ -22,6 +22,7 @@ import LoginUserrouter from "./routes/userLogin.routes.js";
 import TicketRouter from "./routes/Ticket.route.js";
 import userroute from "./routes/chatUser.route.js";
 
+import { upload, uploadToCloudinary } from "./middleware/multer.middleware.js";
 import User from "./models/Chat_Model/chat.user.model.js";
 import Message from "./models/Chat_Model/chat.message.model.js";
 import BasicInfo from "./models/Basicinfo.model.js";
@@ -107,21 +108,16 @@ io.on("connection", (socket) => {
 
   socket.on("establish_connection", async ({ sender, recipient }) => {
     try {
-      console.log(sender, recipient);
-      // const senderExists = await User.findOne({ username: sender });
-      // const recipientExists = await User.findOne({ username: recipient });
-
-      // console.log("recipient existt or not", recipientExists);
-
-      // if (senderExists && recipientExists) {
       socket.join(sender);
       socket.join(recipient);
-      console.log("users are connected burhh!");
+      console.log("Users are connected");
 
       socket.emit("connection_established", {
         success: true,
         message: `Connected to ${recipient}`,
       });
+
+      console.log("users connected bruh");
 
       const messages = await Message.find({
         $or: [
@@ -131,26 +127,42 @@ io.on("connection", (socket) => {
       }).sort("timestamp");
 
       socket.emit("message_history", messages);
-      // } else {
-      //   socket.emit("error", "Sender or recipient does not exist");
-      // }
     } catch (error) {
       console.error("Error in establishing connection:", error);
       socket.emit("error", "Internal Server Error");
     }
   });
 
-  socket.on("send_message", async ({ sender, recipient, content }) => {
-    try {
-      const message = new Message({ sender, recipient, content });
-      await message.save();
+  socket.on(
+    "send_message",
+    async ({ sender, recipient, content, media, mediaType, time }) => {
+      try {
+        let imageUrl = null;
 
-      io.to(sender).emit("receive_message", message);
-      io.to(recipient).emit("receive_message", message);
-    } catch (error) {
-      console.error("Error sending message:", error);
+        if (media) {
+          const result = await uploadToCloudinary(Buffer.from(media));
+          imageUrl = result.secure_url;
+        }
+
+        const message = new Message({
+          sender,
+          recipient,
+          content,
+          images: imageUrl ? { secure_url: imageUrl } : undefined,
+          time,
+        });
+
+        await message.save();
+
+        console.log(message);
+
+        io.to(sender).emit("receive_message", message);
+        io.to(recipient).emit("receive_message", message);
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
     }
-  });
+  );
 
   socket.on("disconnect", () => {
     console.log(`User Disconnected: ${socket.id}`);
