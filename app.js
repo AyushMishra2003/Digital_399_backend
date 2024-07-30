@@ -37,19 +37,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev")); // Logging requests to the console
 
 // CORS configuration
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  next();
-});
+app.use(
+  cors({
+    origin: "https://website3999.online", // Allow your frontend domain
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept"],
+    credentials: true, // Allow credentials if needed
+  })
+);
 
 // Routes
 app.use("/api/v1/user", userRoute);
@@ -74,6 +69,7 @@ app.get("/", (req, res) => {
     message: "Server is running and ready.",
   });
 });
+
 // Catch-all route for undefined endpoints
 app.all("*", (req, res) => {
   res.status(404).json({
@@ -87,7 +83,7 @@ app.all("*", (req, res) => {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "https://website3999.online", // Align with your frontend domain
     methods: ["GET", "POST"],
   },
 });
@@ -108,7 +104,7 @@ io.on("connection", (socket) => {
         socket.join(sender);
         socket.join(recipient);
         console.log(senderExists, recipientExists);
-        console.log("users are connectd burhh!");
+        console.log("users are connected burhh!");
 
         socket.emit("connection_established", {
           success: true,
