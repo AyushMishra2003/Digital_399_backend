@@ -6,7 +6,7 @@ import morgan from "morgan";
 import cors from "cors";
 import dotenv from "dotenv";
 
-// Import routes
+// Import routes and models
 import basicRoute from "./routes/basic.route.js";
 import serviceRoute from "./routes/service.routes.js";
 import smsRouter from "./routes/sms.route.js";
@@ -22,9 +22,9 @@ import LoginUserrouter from "./routes/userLogin.routes.js";
 import TicketRouter from "./routes/Ticket.route.js";
 import userroute from "./routes/chatUser.route.js";
 
-// Import models
 import User from "./models/Chat_Model/chat.user.model.js";
 import Message from "./models/Chat_Model/chat.message.model.js";
+import BasicInfo from "./models/Basicinfo.model.js";
 
 dotenv.config();
 
@@ -37,11 +37,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev")); // Logging requests to the console
 
 // CORS configuration
-const allowedOrigins = [
-  "https://website3999.online",
-  "http://localhost:5173",
-  "https://localhost:5173", // Add this if you're using HTTPS locally
-];
+const allowedOrigins = ["https://website3999.online", "http://localhost:5173"];
 
 app.use(
   cors({
@@ -102,6 +98,7 @@ const io = new Server(server, {
       "https://localhost:5173",
     ],
     methods: ["GET", "POST"],
+    credentials: true, // This should match the CORS configuration for consistency
   },
 });
 
@@ -111,34 +108,32 @@ io.on("connection", (socket) => {
   socket.on("establish_connection", async ({ sender, recipient }) => {
     try {
       console.log(sender, recipient);
-      const senderExists = await User.findOne({ username: sender });
-      const recipientExists = await User.findOne({ username: recipient });
+      // const senderExists = await User.findOne({ username: sender });
+      // const recipientExists = await User.findOne({ username: recipient });
 
-      console.log(senderExists);
-      console.log("recipient", recipientExists);
+      // console.log("recipient existt or not", recipientExists);
 
-      if (senderExists && recipientExists) {
-        socket.join(sender);
-        socket.join(recipient);
-        console.log(senderExists, recipientExists);
-        console.log("users are connected burhh!");
+      // if (senderExists && recipientExists) {
+      socket.join(sender);
+      socket.join(recipient);
+      console.log("users are connected burhh!");
 
-        socket.emit("connection_established", {
-          success: true,
-          message: `Connected to ${recipient}`,
-        });
+      socket.emit("connection_established", {
+        success: true,
+        message: `Connected to ${recipient}`,
+      });
 
-        const messages = await Message.find({
-          $or: [
-            { sender, recipient },
-            { sender: recipient, recipient: sender },
-          ],
-        }).sort("timestamp");
+      const messages = await Message.find({
+        $or: [
+          { sender, recipient },
+          { sender: recipient, recipient: sender },
+        ],
+      }).sort("timestamp");
 
-        socket.emit("message_history", messages);
-      } else {
-        socket.emit("error", "Sender or recipient does not exist");
-      }
+      socket.emit("message_history", messages);
+      // } else {
+      //   socket.emit("error", "Sender or recipient does not exist");
+      // }
     } catch (error) {
       console.error("Error in establishing connection:", error);
       socket.emit("error", "Internal Server Error");
