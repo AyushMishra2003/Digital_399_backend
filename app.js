@@ -37,9 +37,22 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev")); // Logging requests to the console
 
 // CORS configuration
+const allowedOrigins = [
+  "https://website3999.online",
+  "http://localhost:5173",
+  "https://localhost:5173", // Add this if you're using HTTPS locally
+];
+
 app.use(
   cors({
-    origin: "https://website3999.online", // Allow your frontend domain
+    origin: (origin, callback) => {
+      if (allowedOrigins.includes(origin) || !origin) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept"],
     credentials: true, // Allow credentials if needed
@@ -83,7 +96,11 @@ app.all("*", (req, res) => {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "https://website3999.online", // Align with your frontend domain
+    origin: [
+      "https://website3999.online",
+      "http://localhost:5173",
+      "https://localhost:5173",
+    ],
     methods: ["GET", "POST"],
   },
 });
