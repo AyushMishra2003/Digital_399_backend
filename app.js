@@ -6,7 +6,6 @@ import morgan from "morgan";
 import cors from "cors";
 import dotenv from "dotenv";
 
-// Import routes and models
 import basicRoute from "./routes/basic.route.js";
 import serviceRoute from "./routes/service.routes.js";
 import smsRouter from "./routes/sms.route.js";
@@ -99,7 +98,7 @@ const io = new Server(server, {
       "https://localhost:5173",
     ],
     methods: ["GET", "POST"],
-    credentials: true, // This should match the CORS configuration for consistency
+    credentials: true,
   },
 });
 

@@ -29,13 +29,20 @@ export const requestLogin = async (req, res, next) => {
 
     const token = "uCh3Ey5i3cd7AAR4nHm2";
 
-    await sendWhatsAppMessage(
-      `${"91"}${phoneNumber}`,
-      `Dear Customer Your Login Verification code is: ${verificationCode} and expired in 5 Minutes Regard Dev India It Services`,
-      token
-    );
+    const formattedPhoneNumber = `+91${phoneNumber}`;
 
-    await sendSmsMessage(`${"91"}${phoneNumber}`, verificationCode);
+    // await sendWhatsAppMessage(
+    //   `${"91"}${phoneNumber}`,
+    //   `Dear Customer Your Login Verification code is: ${verificationCode} and expired in 5 Minutes Regard Dev India It Services`,
+    //   token
+    // );
+
+    // await sendSmsMessage(`${"91"}${phoneNumber}`, verificationCode);
+
+    await sendSms(
+      formattedPhoneNumber,
+      `Your Login Verification code is: ${verificationCode}`
+    );
 
     const validCodeData = await CodeExpire.findOne({ phoneNumber });
 
