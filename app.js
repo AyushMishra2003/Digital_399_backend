@@ -5,7 +5,6 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import cors from "cors";
 import dotenv from "dotenv";
-
 import basicRoute from "./routes/basic.route.js";
 import serviceRoute from "./routes/service.routes.js";
 import smsRouter from "./routes/sms.route.js";
@@ -20,11 +19,13 @@ import couponRouter from "./routes/coupon.routes.js";
 import LoginUserrouter from "./routes/userLogin.routes.js";
 import TicketRouter from "./routes/Ticket.route.js";
 import userroute from "./routes/chatUser.route.js";
-
 import { upload, uploadToCloudinary } from "./middleware/multer.middleware.js";
 import User from "./models/Chat_Model/chat.user.model.js";
 import Message from "./models/Chat_Model/chat.message.model.js";
 import BasicInfo from "./models/Basicinfo.model.js";
+import path from "path";
+import { fileURLToPath } from "url";
+import userRoutes from "./routes/Test/userRoute.js";
 
 dotenv.config();
 
@@ -35,6 +36,14 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev")); // Logging requests to the console
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
+
+// Attach routes to app
+app.use("/api/users", userRoutes);
 
 // CORS configuration
 const allowedOrigins = ["https://website3999.online", "http://localhost:5173"];
